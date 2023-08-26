@@ -1,6 +1,12 @@
 package model
 
+import db "avito/internal/db"
+
 type ResponseGetUsersSegments struct {
 	User
-	Segments []Segment `json:"segments"`
+	Segments []db.Segment `json:"segments"`
+}
+
+type ResponseGetHistory struct {
+	db.HistoryRow
 }
