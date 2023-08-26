@@ -1,12 +1,12 @@
 package repository
 
 import (
-	"avito/internal/transport/model"
 	"context"
 	"errors"
 	"fmt"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
+	"time"
 )
 
 func (d *Db) PgError(err error) error {
@@ -16,18 +16,23 @@ func (d *Db) PgError(err error) error {
 	}
 	switch pgError.Code {
 	case "23505":
-		return errors.New("repository:")
-	case "123":
-		return errors.New(AlreadyExists)
+		return errors.New("already exists")
+	case notError:
+		return nil
+	case emptyValue:
+		return errors.New(emptyValue)
+	default:
+		return err
 	}
 	return nil
 }
 
 const (
-	dbError = "smth went wrong with db"
+	notError   = "no rows in result set"
+	emptyValue = "empty value"
 )
 
-func (d *Db) GetUsersSegments(ctx context.Context, userId int) ([]model.Segment, error) {
+func (d *Db) GetUsersSegments(ctx context.Context, userId int) ([]Segment, error) {
 	q := `select slug  from  segments  as s
     inner join  user_segment as us on s.id=us.segment_id
 	inner join  users as u on u.id=us.user_id
@@ -39,7 +44,7 @@ func (d *Db) GetUsersSegments(ctx context.Context, userId int) ([]model.Segment,
 	if err != nil {
 		return nil, d.PgError(err)
 	}
-	segments, err := pgx.CollectRows(rows, pgx.RowToStructByName[model.Segment])
+	segments, err := pgx.CollectRows(rows, pgx.RowToStructByName[Segment])
 	if err != nil {
 		return nil, d.PgError(err)
 	}
@@ -76,7 +81,8 @@ func (d *Db) GetSegmentsIds(ctx context.Context, tx interface{}, slugs ...any) (
 	return ids, nil
 }
 func (d *Db) DeleteSegmentsFromUser(ctx context.Context, userId int, slugs ...any) (err error) {
-	//tx, err := d.client.Begin(ctx)
+	tx, err := d.client.Begin(ctx)
+	defer tx.Commit(ctx)
 	//defer tx.Commit(ctx)
 	//if err != nil {
 	//	return d.PgError(err)
@@ -95,12 +101,21 @@ func (d *Db) DeleteSegmentsFromUser(ctx context.Context, userId int, slugs ...an
 		q += toAdd
 
 	}
-	q = q[0:len(q)-1] + "))"
-	fmt.Println(q)
-	if err := d.client.QueryRow(ctx, q, userId).Scan(); err != nil {
+	q = q[0:len(q)-1] + ")) RETURNING us.user_id;"
+	var id int
+	if err := tx.QueryRow(ctx, q, userId).Scan(&id); d.PgError(err) != nil {
 		return d.PgError(err)
 	}
-
+	if id == 0 {
+		return errors.New(emptyValue)
+	}
+	if err := d.AddToHistory(ctx, tx, userId, false, slugs...); d.PgError(err) != nil {
+		fmt.Println(err)
+		if errtx := tx.Rollback(ctx); errtx != nil {
+			return errors.New("tx error")
+		}
+		return d.PgError(err)
+	}
 	return nil
 }
 func (d *Db) AddSegmentsToUser(ctx context.Context, userId int, slugs ...any) (err error) {
@@ -115,14 +130,23 @@ func (d *Db) AddSegmentsToUser(ctx context.Context, userId int, slugs ...any) (e
 	}
 
 	q := `insert into user_segment (user_id,segment_id) values  `
-	for _, id := range slugsIds {
-		toAdd := fmt.Sprintf(` ($1,%d),`, id)
+	var args []any = []any{userId}
+	for i, id := range slugsIds {
+		toAdd := fmt.Sprintf(` ($1,$%d),`, i+2)
 		q += toAdd
+		args = append(args, id)
 
 	}
 	q = q[0 : len(q)-1]
+	if err := tx.QueryRow(ctx, q, args...).Scan(); d.PgError(err) != nil {
 
-	if err := tx.QueryRow(ctx, q, userId).Scan(); err != nil {
+		return d.PgError(err)
+	}
+
+	if err := d.AddToHistory(ctx, tx, userId, true, slugs...); d.PgError(err) != nil {
+		if errtx := tx.Rollback(ctx); errtx != nil {
+			return errors.New("tx error")
+		}
 		return d.PgError(err)
 	}
 	return nil
@@ -158,4 +182,44 @@ func (d *Db) DeleteSegment(ctx context.Context, slug string) error {
 		return d.PgError(err)
 	}
 	return nil
+}
+
+func (d *Db) AddToHistory(ctx context.Context, tx pgx.Tx, userId int, operationType bool, slugs ...any) error {
+	var operationStr string
+	if operationType {
+		operationStr = "insert"
+	} else {
+		operationStr = "delete"
+	}
+	var args []any = []any{userId, operationStr, time.Now()}
+
+	q := `insert into history (user_id,slug,operation,update_time) values `
+
+	for i, slug := range slugs {
+		toAdd := fmt.Sprintf(` ($1,$%d,$2,$3),`, i+4)
+		q += toAdd
+		args = append(args, slug)
+	}
+	q = q[0 : len(q)-1]
+
+	if err := tx.QueryRow(ctx, q, args...).Scan(); d.PgError(err) != nil {
+		return d.PgError(err)
+	}
+	return nil
+
+}
+func (d *Db) GetHistory(ctx context.Context, userId int, year, month int) ([]HistoryRow, error) {
+	q := `select user_id,slug,operation,update_time from  history
+		  where user_id = $1 and
+		  date_part('year', update_time) = $2 and 
+		   date_part('month', update_time)  = $3`
+
+	rows, err := d.client.Query(ctx, q, userId, year, month)
+
+	if d.PgError(err) != nil {
+		return nil, d.PgError(err)
+	}
+	history, err := pgx.CollectRows(rows, pgx.RowToStructByName[HistoryRow])
+	fmt.Println(history)
+	return history, nil
 }
