@@ -1,27 +1,34 @@
 package service
 
 import (
-	repository "avito/internal/db"
-	"avito/internal/service/dto"
+	rep "avito/internal/db"
+	"avito/internal/transport/model"
 	"context"
 )
 
 type Service interface {
 	User
+	Segment
 }
 type service struct {
-	r repository.Repository
+	rep rep.Repository
 }
 
-func New(r repository.Repository) service {
+func New(r rep.Repository) Service {
 	return service{
 		r,
 	}
 }
 
 type User interface {
-	CreateUser(ctx context.Context, user dto.User) error
+	CreateUser(ctx context.Context, username string) error
 	DeleteUser(ctx context.Context, userId int) error
-	AddTagsToUser(ctx context.Context, userId int, slugs ...any) error
-	GetUsersTags(ctx context.Context, userId int) ([]repository.Segment, error)
+	AddSegmentsToUser(ctx context.Context, data model.RequestAddOrDeleteSegmentsToUser) error
+	GetUsersSegments(ctx context.Context, userId int) ([]model.Segment, error)
+	DeleteSegmentsFromUser(ctx context.Context, data model.RequestAddOrDeleteSegmentsToUser) (err error)
+}
+
+type Segment interface {
+	CreateSegment(ctx context.Context, slug string) error
+	DeleteSegment(ctx context.Context, slug string) error
 }
