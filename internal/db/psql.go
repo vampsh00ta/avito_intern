@@ -1,24 +1,24 @@
 package repository
 
 import (
-	"avito/pkg/client"
+	"avito/internal/transport/model"
 	"context"
 	"errors"
 	"fmt"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
-	"go.uber.org/zap"
 )
 
-type Db struct {
-	client postgresql.Client
-	log    *zap.Logger
-}
-
 func (d *Db) PgError(err error) error {
-	if pgError, ok := err.(*pgconn.PgError); ok {
-		d.log.Debug(pgError.Error())
-		return errors.New(dbError)
+	pgError, ok := err.(*pgconn.PgError)
+	if !ok {
+		return nil
+	}
+	switch pgError.Code {
+	case "23505":
+		return errors.New("repository:")
+	case "123":
+		return errors.New(AlreadyExists)
 	}
 	return nil
 }
@@ -27,7 +27,7 @@ const (
 	dbError = "smth went wrong with db"
 )
 
-func (d *Db) GetUsersTags(ctx context.Context, userId int) ([]Segment, error) {
+func (d *Db) GetUsersSegments(ctx context.Context, userId int) ([]model.Segment, error) {
 	q := `select slug  from  segments  as s
     inner join  user_segment as us on s.id=us.segment_id
 	inner join  users as u on u.id=us.user_id
@@ -39,15 +39,12 @@ func (d *Db) GetUsersTags(ctx context.Context, userId int) ([]Segment, error) {
 	if err != nil {
 		return nil, d.PgError(err)
 	}
-	segments, err := pgx.CollectRows(rows, pgx.RowTo[string])
+	segments, err := pgx.CollectRows(rows, pgx.RowToStructByName[model.Segment])
 	if err != nil {
 		return nil, d.PgError(err)
 	}
-	fmt.Println(segments)
-	if err := d.client.QueryRow(ctx, q, userId).Scan(); err != nil {
-		return nil, d.PgError(err)
-	}
-	return nil, nil
+	fmt.Println(segments, 1)
+	return segments, nil
 
 }
 func (d *Db) GetSegmentsIds(ctx context.Context, tx interface{}, slugs ...any) (ids []int, err error) {
@@ -57,9 +54,8 @@ func (d *Db) GetSegmentsIds(ctx context.Context, tx interface{}, slugs ...any) (
 		q += toAdd
 	}
 	txOk, ok := tx.(pgx.Tx)
-
-	q = q[0 : len(q)-1]
-	q += ")"
+	fmt.Println(slugs)
+	q = q[0:len(q)-1] + ")"
 	var rows pgx.Rows
 
 	if ok {
@@ -77,10 +73,37 @@ func (d *Db) GetSegmentsIds(ctx context.Context, tx interface{}, slugs ...any) (
 	if err != nil {
 		return nil, d.PgError(err)
 	}
-
 	return ids, nil
 }
-func (d *Db) AddTagsToUser(ctx context.Context, userId int, slugs ...any) (err error) {
+func (d *Db) DeleteSegmentsFromUser(ctx context.Context, userId int, slugs ...any) (err error) {
+	//tx, err := d.client.Begin(ctx)
+	//defer tx.Commit(ctx)
+	//if err != nil {
+	//	return d.PgError(err)
+	//}
+	//slugsIds, err := d.GetSegmentsIds(ctx, tx, slugs...)
+	//if err != nil {
+	//	return d.PgError(err)
+	//}
+
+	q := `delete from user_segment as us
+       where us.user_id = $1 
+         and 
+       us.segment_id in (select id from segments  as s where s.slug in ( `
+	for _, slug := range slugs {
+		toAdd := fmt.Sprintf(`'%s',`, slug)
+		q += toAdd
+
+	}
+	q = q[0:len(q)-1] + "))"
+	fmt.Println(q)
+	if err := d.client.QueryRow(ctx, q, userId).Scan(); err != nil {
+		return d.PgError(err)
+	}
+
+	return nil
+}
+func (d *Db) AddSegmentsToUser(ctx context.Context, userId int, slugs ...any) (err error) {
 	tx, err := d.client.Begin(ctx)
 	defer tx.Commit(ctx)
 	if err != nil {
@@ -102,21 +125,20 @@ func (d *Db) AddTagsToUser(ctx context.Context, userId int, slugs ...any) (err e
 	if err := tx.QueryRow(ctx, q, userId).Scan(); err != nil {
 		return d.PgError(err)
 	}
-
 	return nil
 }
 
 func (d *Db) CreateUser(ctx context.Context, username string) error {
-	q := `insert into users (username) values ($1)`
+	q := `insert into users (username) values ($1) `
 	if err := d.client.QueryRow(ctx, q, username).Scan(); err != nil {
 		return d.PgError(err)
 	}
 	return nil
 }
 
-func (d *Db) DeleteUser(ctx context.Context, username string) error {
-	q := `delete from users where username = $1 `
-	if err := d.client.QueryRow(ctx, q, username).Scan(); err != nil {
+func (d *Db) DeleteUser(ctx context.Context, id int) error {
+	q := `delete from users where id = $1 `
+	if err := d.client.QueryRow(ctx, q, id).Scan(); err != nil {
 		return d.PgError(err)
 	}
 	return nil
@@ -136,11 +158,4 @@ func (d *Db) DeleteSegment(ctx context.Context, slug string) error {
 		return d.PgError(err)
 	}
 	return nil
-}
-
-func New(client postgresql.Client, logger *zap.Logger) Repository {
-	return &Db{
-		client,
-		logger,
-	}
 }
