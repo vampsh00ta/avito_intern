@@ -9,6 +9,7 @@ import (
 type Service interface {
 	User
 	Segment
+	History
 }
 type service struct {
 	rep rep.Repository
@@ -24,11 +25,14 @@ type User interface {
 	CreateUser(ctx context.Context, username string) error
 	DeleteUser(ctx context.Context, userId int) error
 	AddSegmentsToUser(ctx context.Context, data model.RequestAddOrDeleteSegmentsToUser) error
-	GetUsersSegments(ctx context.Context, userId int) ([]model.Segment, error)
+	GetUsersSegments(ctx context.Context, userId int) ([]rep.Segment, error)
 	DeleteSegmentsFromUser(ctx context.Context, data model.RequestAddOrDeleteSegmentsToUser) (err error)
 }
 
 type Segment interface {
 	CreateSegment(ctx context.Context, slug string) error
 	DeleteSegment(ctx context.Context, slug string) error
+}
+type History interface {
+	GetHistory(ctx context.Context, userId, year, month int) ([]rep.HistoryRow, error)
 }
