@@ -3,12 +3,15 @@ package main
 import (
 	"avito/config"
 	db "avito/internal/db"
+	r "avito/internal/redis"
 	"avito/internal/service"
 	"avito/internal/transport"
+	"avito/internal/ttl"
 	postgresql "avito/pkg/client"
 	"context"
 	"fmt"
 	"github.com/gorilla/mux"
+	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"log"
@@ -19,10 +22,9 @@ import (
 	"time"
 )
 
-type person struct {
-	Name     string
-	LastName string
-	Age      uint8
+type test struct {
+	time time.Time
+	slug string
 }
 
 func main() {
@@ -31,26 +33,36 @@ func main() {
 	//logger
 	logger := LoadLoggerDev()
 
-	//
+	//postgres client
 	dbClient, err := postgresql.NewClient(context.Background(), 5, cfg.DBConfig)
 	if err != nil {
 		logger.Fatal(err.Error())
 	}
+	//redis client
+	clientRedis := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "",
+		DB:       0,
+	})
 	//postgres repository
 	repository := db.New(dbClient, logger)
-
+	//redis repository
+	repRedis := r.New(clientRedis, logger)
+	//new TTL
 	//service
-	srvc := service.New(repository)
+	ttl := ttl.NewTTL(repository, logger, repRedis)
+
+	srvc := service.New(repository, ttl)
 
 	//transport
 	httpServer := transport.NewHttpServer(srvc, logger)
 
 	router := mux.NewRouter()
-	fmt.Println(router, httpServer)
 	server := &http.Server{
 		Addr:    cfg.Address,
 		Handler: router,
 	}
+
 	router.Methods("POST").Path("/segments").HandlerFunc(httpServer.AddSegment)
 	router.Methods("DELETE").Path("/segments").HandlerFunc(httpServer.DeleteSegment)
 
@@ -58,8 +70,10 @@ func main() {
 	router.Methods("DELETE").Path("/user").HandlerFunc(httpServer.DeleteUser)
 
 	router.Methods("GET").Path("/user/segments/{id}/").HandlerFunc(httpServer.GetUsersSegments)
-	router.Methods("POST").Path("/user/segments").HandlerFunc(httpServer.GetUsersSegments)
-	router.Methods("DELETE").Path("/user/segments").HandlerFunc(httpServer.GetUsersSegments)
+	router.Methods("POST").Path("/user/segments").HandlerFunc(httpServer.AddSegmentsToUser)
+	router.Methods("DELETE").Path("/user/segments").HandlerFunc(httpServer.DeleteSegmentsFromUser)
+
+	router.Methods("GET").Path("/history").HandlerFunc(httpServer.GetHistory)
 
 	exit := make(chan struct{})
 	go func() {
@@ -73,7 +87,9 @@ func main() {
 		}
 		close(exit)
 	}()
-	log.Printf("Starting HTTP server on %s", cfg.Address)
+
+	logger.Infow(fmt.Sprintf("Starting HTTP server on %s", cfg.Address))
+	go ttl.Start(context.Background(), exit)
 
 	if err := server.ListenAndServe(); err != http.ErrServerClosed {
 		log.Fatalf("HTTP server ListenAndServe Error: %v", err)

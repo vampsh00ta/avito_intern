@@ -13,6 +13,11 @@ type RequestCreateOrDeleteSegment struct {
 	db.Segment
 }
 
+//	type AddOrDeleteSegmentsToUser_Segment struct {
+//		Segments []db.Segment `json:"slugs" validate:"required"`
+//		Expire int    `json:"expire,omitempty" `
+//
+// }
 type RequestAddOrDeleteSegmentsToUser struct {
 	User
 	Segments []db.Segment `json:"slugs" validate:"required"`

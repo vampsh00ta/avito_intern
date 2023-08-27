@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-playground/validator/v10"
+	"github.com/gocarina/gocsv"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/schema"
 
@@ -14,6 +15,9 @@ import (
 	"net/http"
 	"strconv"
 )
+
+var validate = validator.New()
+var decoder = schema.NewDecoder()
 
 type HttpServer struct {
 	service service.Service
@@ -26,9 +30,9 @@ func NewHttpServer(service service.Service, logger *zap.SugaredLogger) Transport
 		log:     logger,
 	}
 }
+
 func (h HttpServer) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var req model.RequestCreateOrDeleteUser
-	validate := validator.New()
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		h.log.Errorf("CreateUser", "mehthod", r.Method, "error", err)
 		//val := err.(json.InvalidUnmarshalError)
@@ -156,7 +160,7 @@ func (h HttpServer) AddSegmentsToUser(w http.ResponseWriter, r *http.Request) {
 
 	}
 
-	if err := h.service.AddSegmentsToUser(r.Context(), req); err != nil {
+	if err := h.service.AddSegmentsToUser(r.Context(), req.Id, req.Segments...); err != nil {
 		response.ReturnError(w, r, err)
 		return
 	}
@@ -175,8 +179,11 @@ func (h HttpServer) DeleteSegmentsFromUser(w http.ResponseWriter, r *http.Reques
 		return
 
 	}
-
-	if err := h.service.DeleteSegmentsFromUser(r.Context(), req); err != nil {
+	var slugs []any
+	for _, slug := range req.Segments {
+		slugs = append(slugs, slug.Slug)
+	}
+	if err := h.service.DeleteSegmentsFromUser(r.Context(), req.Id, slugs...); err != nil {
 		response.ReturnError(w, r, err)
 		return
 	}
@@ -189,9 +196,13 @@ func (h HttpServer) DeleteSegmentsFromUser(w http.ResponseWriter, r *http.Reques
 
 func (h HttpServer) GetHistory(w http.ResponseWriter, r *http.Request) {
 	var req model.RequestGetHistory
-	var decoder = schema.NewDecoder()
-	err := decoder.Decode(&req, r.URL.Query())
-	if err != nil {
+	if err := decoder.Decode(&req, r.URL.Query()); err != nil {
+		h.log.Error("transport:GetHistory ", zap.String("data", err.Error()))
+		response.ReturnError(w, r, err)
+		return
+	}
+
+	if err := validate.Struct(req); err != nil {
 		h.log.Error("transport:GetHistory ", zap.String("data", err.Error()))
 		response.ReturnError(w, r, err)
 		return
@@ -202,6 +213,10 @@ func (h HttpServer) GetHistory(w http.ResponseWriter, r *http.Request) {
 		response.ReturnError(w, r, err)
 		return
 	}
-	response.ReturnOkData(w, r, history)
+	w.Header().Set("Content-Type", "text/csv")
+	gocsv.Marshal(history, w)
+
+	//gocsv.Marshal(tests, rw)
+	//response.ReturnOkData(w, r, history)
 	return
 }

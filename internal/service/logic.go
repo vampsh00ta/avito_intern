@@ -2,8 +2,9 @@ package service
 
 import (
 	rep "avito/internal/db"
-	"avito/internal/transport/model"
 	"context"
+	"fmt"
+	"time"
 )
 
 func (s service) CreateUser(ctx context.Context, username string) error {
@@ -16,23 +17,40 @@ func (s service) DeleteUser(ctx context.Context, userId int) error {
 	return s.rep.DeleteUser(ctx, userId)
 }
 
-func (s service) AddSegmentsToUser(ctx context.Context, data model.RequestAddOrDeleteSegmentsToUser) error {
+func (s service) AddSegmentsToUser(ctx context.Context, userId int, segments ...rep.Segment) error {
 	var slugs []any
-	for _, slug := range data.Segments {
-		slugs = append(slugs, slug.Slug)
+	var ttlSlugs []string
+	for _, segment := range segments {
+		slugs = append(slugs, segment.Slug)
+		if segment.Expire != (rep.Expire{}) {
+			days := time.Duration(segment.Expire.Days) * time.Hour * 24
+			hours := time.Duration(segment.Expire.Hours) * time.Hour
+			minutes := time.Duration(segment.Expire.Minutes) * time.Minute
+
+			timeEnds := time.Now().Add(days + hours + minutes)
+			s.ttl.Collect(&ttlSlugs, userId, segment.Slug, timeEnds)
+		}
+
 	}
-	return s.rep.AddSegmentsToUser(ctx, data.Id, slugs...)
+	fmt.Println(ttlSlugs)
+	if err := s.rep.AddSegmentsToUser(ctx, userId, slugs...); err != nil {
+		return err
+	}
+	if err := s.ttl.Add(ctx, ttlSlugs); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s service) GetUsersSegments(ctx context.Context, userId int) ([]rep.Segment, error) {
 	return s.rep.GetUsersSegments(ctx, userId)
 }
-func (s service) DeleteSegmentsFromUser(ctx context.Context, data model.RequestAddOrDeleteSegmentsToUser) (err error) {
-	var slugs []any
-	for _, slug := range data.Segments {
-		slugs = append(slugs, slug.Slug)
-	}
-	return s.rep.DeleteSegmentsFromUser(ctx, data.Id, slugs...)
+func (s service) DeleteSegmentsFromUser(ctx context.Context, userId int, slugs ...any) (err error) {
+	////var slugs []any
+	//for _, slug := range slugs {
+	//	slugs = append(slugs, slug.Slug)
+	//}
+	return s.rep.DeleteSegmentsFromUser(ctx, userId, slugs...)
 }
 
 func (s service) CreateSegment(ctx context.Context, slug string) error {

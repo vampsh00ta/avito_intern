@@ -2,7 +2,7 @@ package service
 
 import (
 	rep "avito/internal/db"
-	"avito/internal/transport/model"
+	"avito/internal/ttl"
 	"context"
 )
 
@@ -13,20 +13,22 @@ type Service interface {
 }
 type service struct {
 	rep rep.Repository
+	ttl ttl.TTL
 }
 
-func New(r rep.Repository) Service {
+func New(r rep.Repository, ttl ttl.TTL) Service {
 	return service{
 		r,
+		ttl,
 	}
 }
 
 type User interface {
 	CreateUser(ctx context.Context, username string) error
 	DeleteUser(ctx context.Context, userId int) error
-	AddSegmentsToUser(ctx context.Context, data model.RequestAddOrDeleteSegmentsToUser) error
+	AddSegmentsToUser(ctx context.Context, userId int, segments ...rep.Segment) error
 	GetUsersSegments(ctx context.Context, userId int) ([]rep.Segment, error)
-	DeleteSegmentsFromUser(ctx context.Context, data model.RequestAddOrDeleteSegmentsToUser) (err error)
+	DeleteSegmentsFromUser(ctx context.Context, userId int, slugs ...any) (err error)
 }
 
 type Segment interface {

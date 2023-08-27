@@ -37,7 +37,6 @@ func NewClient(ctx context.Context, maxAttempts int, config config.DBConfig) (po
 		return nil
 	}, maxAttempts, 5)
 
-	print(dsn)
 	if err != nil {
 		log.Fatal("error with tries to connect")
 
