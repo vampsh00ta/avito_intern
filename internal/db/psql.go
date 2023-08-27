@@ -59,7 +59,6 @@ func (d *Db) GetSegmentsIds(ctx context.Context, tx interface{}, slugs ...any) (
 		q += toAdd
 	}
 	txOk, ok := tx.(pgx.Tx)
-	fmt.Println(slugs)
 	q = q[0:len(q)-1] + ")"
 	var rows pgx.Rows
 
@@ -101,16 +100,11 @@ func (d *Db) DeleteSegmentsFromUser(ctx context.Context, userId int, slugs ...an
 		q += toAdd
 
 	}
-	q = q[0:len(q)-1] + ")) RETURNING us.user_id;"
-	var id int
-	if err := tx.QueryRow(ctx, q, userId).Scan(&id); d.PgError(err) != nil {
+	q = q[0:len(q)-1] + ")) "
+	if err := tx.QueryRow(ctx, q, userId).Scan(); d.PgError(err) != nil {
 		return d.PgError(err)
 	}
-	if id == 0 {
-		return errors.New(emptyValue)
-	}
 	if err := d.AddToHistory(ctx, tx, userId, false, slugs...); d.PgError(err) != nil {
-		fmt.Println(err)
 		if errtx := tx.Rollback(ctx); errtx != nil {
 			return errors.New("tx error")
 		}

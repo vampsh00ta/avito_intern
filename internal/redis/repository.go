@@ -7,7 +7,7 @@ import (
 )
 
 type Repository interface {
-	SetTTL(ctx context.Context, fields ...any) error
+	SetTTL(ctx context.Context, fields ...string) error
 	GetTTls(ctx context.Context) (map[string]string, error)
 	DelUsersSegments(tx context.Context, fields ...string) error
 }

@@ -3,7 +3,7 @@ package service
 import (
 	rep "avito/internal/db"
 	"context"
-	"fmt"
+	"strconv"
 	"time"
 )
 
@@ -22,7 +22,7 @@ func (s service) AddSegmentsToUser(ctx context.Context, userId int, segments ...
 	var ttlSlugs []string
 	for _, segment := range segments {
 		slugs = append(slugs, segment.Slug)
-		if segment.Expire != (rep.Expire{}) {
+		if segment.Expire != nil {
 			days := time.Duration(segment.Expire.Days) * time.Hour * 24
 			hours := time.Duration(segment.Expire.Hours) * time.Hour
 			minutes := time.Duration(segment.Expire.Minutes) * time.Minute
@@ -32,11 +32,11 @@ func (s service) AddSegmentsToUser(ctx context.Context, userId int, segments ...
 		}
 
 	}
-	fmt.Println(ttlSlugs)
+
 	if err := s.rep.AddSegmentsToUser(ctx, userId, slugs...); err != nil {
 		return err
 	}
-	if err := s.ttl.Add(ctx, ttlSlugs); err != nil {
+	if err := s.ttl.SetTTL(ctx, ttlSlugs...); err != nil {
 		return err
 	}
 	return nil
@@ -46,14 +46,23 @@ func (s service) GetUsersSegments(ctx context.Context, userId int) ([]rep.Segmen
 	return s.rep.GetUsersSegments(ctx, userId)
 }
 func (s service) DeleteSegmentsFromUser(ctx context.Context, userId int, slugs ...any) (err error) {
-	////var slugs []any
-	//for _, slug := range slugs {
-	//	slugs = append(slugs, slug.Slug)
-	//}
-	return s.rep.DeleteSegmentsFromUser(ctx, userId, slugs...)
+	var slugsToDelete []string
+	for _, slug := range slugs {
+		redisKey := strconv.Itoa(userId) + ":" + slug.(string)
+		slugsToDelete = append(slugsToDelete, redisKey)
+
+	}
+	if err := s.rep.DeleteSegmentsFromUser(ctx, userId, slugs...); err != nil {
+		return err
+	}
+	if err := s.ttl.DelUsersSegments(ctx, slugsToDelete...); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s service) CreateSegment(ctx context.Context, slug string) error {
+
 	return s.rep.CreateSegment(ctx, slug)
 
 }

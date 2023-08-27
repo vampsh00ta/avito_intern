@@ -3,8 +3,8 @@ package repository
 import "time"
 
 type Segment struct {
-	Slug   string `json:"slug" db:"slug" validate:"required" csv:"slug"`
-	Expire Expire `json:"expire,omitempty" db:"-"`
+	Slug   string  `json:"slug" db:"slug" validate:"required" csv:"slug"`
+	Expire *Expire `json:"expire,omitempty" db:"-"`
 	//"2015-07-05T22:16:18Z
 }
 

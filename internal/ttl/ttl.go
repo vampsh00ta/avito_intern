@@ -15,7 +15,8 @@ type TTLMonitor struct {
 }
 type TTL interface {
 	Collect(args *[]string, userId int, slug string, time time.Time)
-	Add(ctx context.Context, slugs ...any) error
+	SetTTL(ctx context.Context, slugs ...string) error
+	DelUsersSegments(ctx context.Context, slugs ...string) error
 }
 
 func NewTTL(rep rep.Repository, logger *zap.SugaredLogger, redis redis.Repository) *TTLMonitor {

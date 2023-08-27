@@ -4,8 +4,12 @@ import (
 	"context"
 )
 
-func (r *Redis) SetTTL(ctx context.Context, fields ...any) error {
-	if err := r.client.HSet(ctx, "ttl", fields...).Err(); err != nil {
+func (r *Redis) SetTTL(ctx context.Context, fields ...string) error {
+	args := make([]interface{}, len(fields))
+	for i, v := range fields {
+		args[i] = v
+	}
+	if err := r.client.HSet(ctx, "ttl", args...).Err(); err != nil {
 		return err
 	}
 	return nil
@@ -27,10 +31,3 @@ func (r *Redis) DelUsersSegments(ctx context.Context, fields ...string) error {
 	}
 	return nil
 }
-
-//ttl:
-//	"1:2":"time"
-//
-//
-//
-//
