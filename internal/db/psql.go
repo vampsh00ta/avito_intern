@@ -48,48 +48,13 @@ func (d *Db) GetUsersSegments(ctx context.Context, userId int) ([]Segment, error
 	if err != nil {
 		return nil, d.PgError(err)
 	}
-	fmt.Println(segments, 1)
 	return segments, nil
 
 }
-func (d *Db) GetSegmentsIds(ctx context.Context, tx interface{}, slugs ...any) (ids []int, err error) {
-	q := `select id from  segments where slug in ( `
-	for i, _ := range slugs {
-		toAdd := fmt.Sprintf(`$%d,`, i+1)
-		q += toAdd
-	}
-	txOk, ok := tx.(pgx.Tx)
-	q = q[0:len(q)-1] + ")"
-	var rows pgx.Rows
 
-	if ok {
-		rows, err = txOk.Query(ctx, q, slugs...)
-
-	} else {
-		rows, err = d.client.Query(ctx, q, slugs...)
-
-	}
-
-	if err != nil {
-		return nil, d.PgError(err)
-	}
-	ids, err = pgx.CollectRows(rows, pgx.RowTo[int])
-	if err != nil {
-		return nil, d.PgError(err)
-	}
-	return ids, nil
-}
 func (d *Db) DeleteSegmentsFromUser(ctx context.Context, userId int, slugs ...any) (err error) {
 	tx, err := d.client.Begin(ctx)
 	defer tx.Commit(ctx)
-	//defer tx.Commit(ctx)
-	//if err != nil {
-	//	return d.PgError(err)
-	//}
-	//slugsIds, err := d.GetSegmentsIds(ctx, tx, slugs...)
-	//if err != nil {
-	//	return d.PgError(err)
-	//}
 
 	q := `delete from user_segment as us
        where us.user_id = $1 
@@ -118,25 +83,20 @@ func (d *Db) AddSegmentsToUser(ctx context.Context, userId int, slugs ...any) (e
 	if err != nil {
 		return d.PgError(err)
 	}
-	slugsIds, err := d.GetSegmentsIds(ctx, tx, slugs...)
-	if err != nil {
-		return d.PgError(err)
-	}
+	q := `insert into user_segment (user_id,segment_id) select $1,segments.id from segments where slug in ( `
+	var args = []any{userId}
 
-	q := `insert into user_segment (user_id,segment_id) values  `
-	var args []any = []any{userId}
-	for i, id := range slugsIds {
-		toAdd := fmt.Sprintf(` ($1,$%d),`, i+2)
+	for i, slug := range slugs {
+		toAdd := fmt.Sprintf(`$%d,`, i+2)
 		q += toAdd
-		args = append(args, id)
+		args = append(args, slug)
 
 	}
-	q = q[0 : len(q)-1]
-	if err := tx.QueryRow(ctx, q, args...).Scan(); d.PgError(err) != nil {
+	q = q[0:len(q)-1] + ")"
 
+	if err := tx.QueryRow(ctx, q, args...).Scan(); d.PgError(err) != nil {
 		return d.PgError(err)
 	}
-
 	if err := d.AddToHistory(ctx, tx, userId, true, slugs...); d.PgError(err) != nil {
 		if errtx := tx.Rollback(ctx); errtx != nil {
 			return errors.New("tx error")

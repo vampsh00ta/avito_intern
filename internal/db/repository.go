@@ -22,7 +22,6 @@ type UserRepository interface {
 type SegmentRepository interface {
 	CreateSegment(ctx context.Context, slug string) error
 	DeleteSegment(ctx context.Context, slug string) error
-	GetSegmentsIds(ctx context.Context, tx interface{}, slugs ...any) ([]int, error)
 }
 type History interface {
 	AddToHistory(ctx context.Context, tx pgx.Tx, userId int, operationType bool, slugs ...any) error
