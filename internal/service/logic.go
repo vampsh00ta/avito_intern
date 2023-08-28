@@ -36,7 +36,7 @@ func (s service) AddSegmentsToUser(ctx context.Context, userId int, segments ...
 
 	}
 
-	if err := s.rep.AddSegmentsToUser(ctx, userId, slugs...); err != nil {
+	if err := s.rep.AddSegmentsToUser(ctx, userId, segments...); err != nil {
 		return err
 	}
 	if err := s.ttl.SetTTL(ctx, ttlSlugs...); err != nil {
@@ -48,14 +48,14 @@ func (s service) AddSegmentsToUser(ctx context.Context, userId int, segments ...
 func (s service) GetUsersSegments(ctx context.Context, userId int) ([]rep.Segment, error) {
 	return s.rep.GetUsersSegments(ctx, userId)
 }
-func (s service) DeleteSegmentsFromUser(ctx context.Context, userId int, slugs ...any) (err error) {
+func (s service) DeleteSegmentsFromUser(ctx context.Context, userId int, segments ...rep.Segment) (err error) {
 	var slugsToDelete []string
-	for _, slug := range slugs {
-		redisKey := strconv.Itoa(userId) + ":" + slug.(string)
+	for _, segment := range segments {
+		redisKey := strconv.Itoa(userId) + ":" + segment.Slug
 		slugsToDelete = append(slugsToDelete, redisKey)
 
 	}
-	if err := s.rep.DeleteSegmentsFromUser(ctx, userId, slugs...); err != nil {
+	if err := s.rep.DeleteSegmentsFromUser(ctx, userId, segments...); err != nil {
 		return err
 	}
 	if err := s.ttl.DelUsersSegments(ctx, slugsToDelete...); err != nil {
@@ -64,10 +64,11 @@ func (s service) DeleteSegmentsFromUser(ctx context.Context, userId int, slugs .
 	return nil
 }
 func (s service) CreateSegmentPercent(ctx context.Context, segment rep.Segment) ([]rep.User, error) {
-	slugId, err := s.rep.CreateSegment(ctx, segment.Slug)
+	slugId, err := s.rep.CreateSegment(ctx, segment)
 	if err != nil {
 		return nil, err
 	}
+	segment.Id = slugId
 	if segment.RandomSeed == 0 {
 		return nil, err
 	}
@@ -84,7 +85,7 @@ func (s service) CreateSegmentPercent(ctx context.Context, segment rep.Segment) 
 	randomCount := math.Ceil(float64(len(userIds)) * float64(percent))
 	shuffledUserIds := userIds[0:int(randomCount)]
 
-	if err := s.rep.AddSlugIdToUsers(ctx, slugId, shuffledUserIds...); err != nil {
+	if err := s.rep.AddSlugIdToUsers(ctx, segment, shuffledUserIds...); err != nil {
 		return nil, err
 	}
 	var users []rep.User
@@ -95,15 +96,15 @@ func (s service) CreateSegmentPercent(ctx context.Context, segment rep.Segment) 
 }
 func (s service) CreateSegment(ctx context.Context, segment rep.Segment) error {
 
-	_, err := s.rep.CreateSegment(ctx, segment.Slug)
+	_, err := s.rep.CreateSegment(ctx, segment)
 	if err != nil {
 		return err
 	}
 	return nil
 
 }
-func (s service) DeleteSegment(ctx context.Context, slug string) error {
-	return s.rep.DeleteSegment(ctx, slug)
+func (s service) DeleteSegment(ctx context.Context, segment rep.Segment) error {
+	return s.rep.DeleteSegment(ctx, segment)
 
 }
 

@@ -3,6 +3,8 @@ package repository
 import "time"
 
 type Segment struct {
+	Id int `json:"id" db:"-"  `
+
 	Slug       string  `json:"slug" db:"slug" validate:"required" csv:"slug"`
 	Expire     *Expire `json:"expire,omitempty" db:"-"`
 	RandomSeed int     `json:"random,omitempty" db:"-"`

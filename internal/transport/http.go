@@ -138,8 +138,7 @@ func (h HttpServer) DeleteSegment(w http.ResponseWriter, r *http.Request) {
 		return
 
 	}
-
-	if err := h.service.DeleteSegment(r.Context(), req.Slug); err != nil {
+	if err := h.service.DeleteSegment(r.Context(), req.Segment); err != nil {
 		response.ReturnError(w, r, err)
 		return
 	}
@@ -201,11 +200,8 @@ func (h HttpServer) DeleteSegmentsFromUser(w http.ResponseWriter, r *http.Reques
 		return
 
 	}
-	var slugs []any
-	for _, slug := range req.Segments {
-		slugs = append(slugs, slug.Slug)
-	}
-	if err := h.service.DeleteSegmentsFromUser(r.Context(), req.Id, slugs...); err != nil {
+
+	if err := h.service.DeleteSegmentsFromUser(r.Context(), req.Id, req.Segments...); err != nil {
 		response.ReturnError(w, r, err)
 		return
 	}

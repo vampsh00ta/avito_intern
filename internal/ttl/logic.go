@@ -1,6 +1,7 @@
 package ttl
 
 import (
+	rep "avito/internal/db"
 	"context"
 	"os"
 	"strconv"
@@ -60,7 +61,7 @@ func (t *TTLMonitor) Start(ctx context.Context, exit chan struct{}) {
 					continue
 				}
 				if currTime.Compare(ttlTime) > 0 {
-					if err := t.rep.DeleteSegmentsFromUser(ctx, userId, slug); err != nil {
+					if err := t.rep.DeleteSegmentsFromUser(ctx, userId, rep.Segment{Slug: slug}); err != nil {
 						t.logger.Errorw("db err", "error", err)
 						continue
 					}

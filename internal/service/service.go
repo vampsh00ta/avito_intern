@@ -28,13 +28,13 @@ type User interface {
 	DeleteUser(ctx context.Context, userId int) error
 	AddSegmentsToUser(ctx context.Context, userId int, segments ...rep.Segment) error
 	GetUsersSegments(ctx context.Context, userId int) ([]rep.Segment, error)
-	DeleteSegmentsFromUser(ctx context.Context, userId int, slugs ...any) (err error)
+	DeleteSegmentsFromUser(ctx context.Context, userId int, segments ...rep.Segment) (err error)
 }
 
 type Segment interface {
 	CreateSegment(ctx context.Context, segment rep.Segment) error
 	CreateSegmentPercent(ctx context.Context, segment rep.Segment) ([]rep.User, error)
-	DeleteSegment(ctx context.Context, slug string) error
+	DeleteSegment(ctx context.Context, segment rep.Segment) error
 }
 type History interface {
 	GetHistory(ctx context.Context, userId, year, month int) ([]rep.HistoryRow, error)

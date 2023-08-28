@@ -62,24 +62,25 @@ func (d *Db) GetUsersSegments(ctx context.Context, userId int) ([]Segment, error
 
 }
 
-func (d *Db) DeleteSegmentsFromUser(ctx context.Context, userId int, slugs ...any) (err error) {
+func (d *Db) DeleteSegmentsFromUser(ctx context.Context, userId int, segments ...Segment) (err error) {
 	tx, err := d.client.Begin(ctx)
 	defer tx.Commit(ctx)
-
+	var args []any = []any{userId}
 	q := `delete from user_segment as us
        where us.user_id = $1 
          and 
        us.segment_id in (select id from segments  as s where s.slug in ( `
-	for _, slug := range slugs {
-		toAdd := fmt.Sprintf(`'%s',`, slug)
+	for i, segment := range segments {
+		toAdd := fmt.Sprintf(`$,`, i+2)
 		q += toAdd
+		args = append(args, segment.Slug)
 
 	}
 	q = q[0:len(q)-1] + ")) "
-	if err := tx.QueryRow(ctx, q, userId).Scan(); d.PgError(err) != nil {
+	if err := tx.QueryRow(ctx, q, args...).Scan(); d.PgError(err) != nil {
 		return d.PgError(err)
 	}
-	if err := d.AddToHistoryUserSlugs(ctx, tx, userId, false, slugs...); d.PgError(err) != nil {
+	if err := d.AddToHistoryUserSlugs(ctx, tx, userId, false, segments...); d.PgError(err) != nil {
 		if errtx := tx.Rollback(ctx); errtx != nil {
 			return errors.New("tx error")
 		}
@@ -87,7 +88,7 @@ func (d *Db) DeleteSegmentsFromUser(ctx context.Context, userId int, slugs ...an
 	}
 	return nil
 }
-func (d *Db) AddSegmentsToUser(ctx context.Context, userId int, slugs ...any) (err error) {
+func (d *Db) AddSegmentsToUser(ctx context.Context, userId int, segments ...Segment) (err error) {
 	tx, err := d.client.Begin(ctx)
 	defer tx.Commit(ctx)
 	if err != nil {
@@ -96,10 +97,10 @@ func (d *Db) AddSegmentsToUser(ctx context.Context, userId int, slugs ...any) (e
 	q := `insert into user_segment (user_id,segment_id) select $1,segments.id from segments where slug in ( `
 	var args = []any{userId}
 
-	for i, slug := range slugs {
+	for i, segment := range segments {
 		toAdd := fmt.Sprintf(`$%d,`, i+2)
 		q += toAdd
-		args = append(args, slug)
+		args = append(args, segment.Slug)
 
 	}
 	q = q[0:len(q)-1] + ")"
@@ -107,7 +108,7 @@ func (d *Db) AddSegmentsToUser(ctx context.Context, userId int, slugs ...any) (e
 	if err := tx.QueryRow(ctx, q, args...).Scan(); d.PgError(err) != nil {
 		return d.PgError(err)
 	}
-	if err := d.AddToHistoryUserSlugs(ctx, tx, userId, true, slugs...); d.PgError(err) != nil {
+	if err := d.AddToHistoryUserSlugs(ctx, tx, userId, true, segments...); d.PgError(err) != nil {
 		if errtx := tx.Rollback(ctx); errtx != nil {
 			return errors.New("tx error")
 		}
@@ -115,7 +116,7 @@ func (d *Db) AddSegmentsToUser(ctx context.Context, userId int, slugs ...any) (e
 	}
 	return nil
 }
-func (d *Db) AddSlugIdToUsers(ctx context.Context, slugId int, ids ...int) (err error) {
+func (d *Db) AddSlugIdToUsers(ctx context.Context, segment Segment, ids ...int) (err error) {
 	tx, err := d.client.Begin(ctx)
 	defer tx.Commit(ctx)
 	if err != nil {
@@ -123,20 +124,18 @@ func (d *Db) AddSlugIdToUsers(ctx context.Context, slugId int, ids ...int) (err 
 	}
 
 	q := `insert into user_segment (user_id,segment_id) values `
-	var args = []any{slugId}
-
+	var args = []any{segment.Id}
 	for i, id := range ids {
 		toAdd := fmt.Sprintf(`($%d,$1),`, i+2)
 		q += toAdd
 		args = append(args, id)
-
 	}
 	q = q[0 : len(q)-1]
 
 	if err := tx.QueryRow(ctx, q, args...).Scan(); d.PgError(err) != nil {
 		return d.PgError(err)
 	}
-	if err := d.AddToHistorySlugUsers(ctx, tx, slugId, true, ids...); d.PgError(err) != nil {
+	if err := d.AddToHistorySlugUsers(ctx, tx, segment, true, ids...); d.PgError(err) != nil {
 		if errtx := tx.Rollback(ctx); errtx != nil {
 			return errors.New("tx error")
 		}
@@ -160,24 +159,24 @@ func (d *Db) DeleteUser(ctx context.Context, id int) error {
 	return nil
 }
 
-func (d *Db) CreateSegment(ctx context.Context, slug string) (int, error) {
+func (d *Db) CreateSegment(ctx context.Context, segment Segment) (int, error) {
 	q := `insert into segments (slug) values ($1) returning id`
 	var id int
-	if err := d.client.QueryRow(ctx, q, slug).Scan(&id); err != nil {
+	if err := d.client.QueryRow(ctx, q, segment.Slug).Scan(&id); err != nil {
 		return -1, d.PgError(err)
 	}
 	return id, nil
 }
 
-func (d *Db) DeleteSegment(ctx context.Context, slug string) error {
+func (d *Db) DeleteSegment(ctx context.Context, segment Segment) error {
 	q := `delete from segments where slug = $1 `
-	if err := d.client.QueryRow(ctx, q, slug).Scan(); err != nil {
+	if err := d.client.QueryRow(ctx, q, segment.Slug).Scan(); err != nil {
 		return d.PgError(err)
 	}
 	return nil
 }
 
-func (d *Db) AddToHistorySlugUsers(ctx context.Context, tx pgx.Tx, slugId int, operationType bool, ids ...int) error {
+func (d *Db) AddToHistorySlugUsers(ctx context.Context, tx pgx.Tx, segment Segment, operationType bool, ids ...int) error {
 
 	var operationStr string
 	if operationType {
@@ -185,7 +184,7 @@ func (d *Db) AddToHistorySlugUsers(ctx context.Context, tx pgx.Tx, slugId int, o
 	} else {
 		operationStr = "delete"
 	}
-	var args []any = []any{slugId, operationStr, time.Now()}
+	var args []any = []any{segment.Slug, operationStr, time.Now()}
 
 	q := `insert into history (user_id,slug,operation,update_time) values `
 
@@ -203,7 +202,7 @@ func (d *Db) AddToHistorySlugUsers(ctx context.Context, tx pgx.Tx, slugId int, o
 	return nil
 }
 
-func (d *Db) AddToHistoryUserSlugs(ctx context.Context, tx pgx.Tx, userId int, operationType bool, slugs ...any) error {
+func (d *Db) AddToHistoryUserSlugs(ctx context.Context, tx pgx.Tx, userId int, operationType bool, segments ...Segment) error {
 	var operationStr string
 	if operationType {
 		operationStr = "insert"
@@ -214,10 +213,10 @@ func (d *Db) AddToHistoryUserSlugs(ctx context.Context, tx pgx.Tx, userId int, o
 
 	q := `insert into history (user_id,slug,operation,update_time) values `
 
-	for i, slug := range slugs {
+	for i, segment := range segments {
 		toAdd := fmt.Sprintf(` ($1,$%d,$2,$3),`, i+4)
 		q += toAdd
-		args = append(args, slug)
+		args = append(args, segment.Slug)
 	}
 	q = q[0 : len(q)-1]
 
