@@ -22,7 +22,7 @@ func (s service) DeleteUser(ctx context.Context, userId int) error {
 
 func (s service) AddSegmentsToUser(ctx context.Context, userId int, segments ...rep.Segment) error {
 	var slugs []any
-	var ttlSlugs []string
+	//var ttlSlugs []string
 	for _, segment := range segments {
 		slugs = append(slugs, segment.Slug)
 		if segment.Expire != nil {
@@ -31,7 +31,8 @@ func (s service) AddSegmentsToUser(ctx context.Context, userId int, segments ...
 			minutes := time.Duration(segment.Expire.Minutes) * time.Minute
 
 			timeEnds := time.Now().Add(days + hours + minutes)
-			s.ttl.Collect(&ttlSlugs, userId, segment.Slug, timeEnds)
+			s.ttl.Set(userId, segment, timeEnds)
+			//s.ttl.Collect(&ttlSlugs, userId, segment.Slug, timeEnds)
 		}
 
 	}
@@ -39,9 +40,9 @@ func (s service) AddSegmentsToUser(ctx context.Context, userId int, segments ...
 	if err := s.rep.AddSegmentsToUser(ctx, userId, segments...); err != nil {
 		return err
 	}
-	if err := s.ttl.SetTTL(ctx, ttlSlugs...); err != nil {
-		return err
-	}
+	//if err := s.ttl.SetTTL(ctx, ttlSlugs...); err != nil {
+	//	return err
+	//}
 	return nil
 }
 
@@ -49,18 +50,16 @@ func (s service) GetUsersSegments(ctx context.Context, userId int) ([]rep.Segmen
 	return s.rep.GetUsersSegments(ctx, userId)
 }
 func (s service) DeleteSegmentsFromUser(ctx context.Context, userId int, segments ...rep.Segment) (err error) {
-	var slugsToDelete []string
+	var keysToDelete []string
 	for _, segment := range segments {
-		redisKey := strconv.Itoa(userId) + ":" + segment.Slug
-		slugsToDelete = append(slugsToDelete, redisKey)
+		key := strconv.Itoa(userId) + ":" + segment.Slug
+		keysToDelete = append(keysToDelete, key)
 
 	}
 	if err := s.rep.DeleteSegmentsFromUser(ctx, userId, segments...); err != nil {
 		return err
 	}
-	if err := s.ttl.DelUsersSegments(ctx, slugsToDelete...); err != nil {
-		return err
-	}
+	s.ttl.Delete(keysToDelete...)
 	return nil
 }
 func (s service) CreateSegmentPercent(ctx context.Context, segment rep.Segment) ([]rep.User, error) {

@@ -4,7 +4,6 @@ import (
 	"avito/config"
 	_ "avito/docs"
 	db "avito/internal/db"
-	r "avito/internal/redis"
 	"avito/internal/service"
 	"avito/internal/transport"
 	"avito/internal/ttl"
@@ -13,7 +12,6 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 
-	"github.com/redis/go-redis/v9"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -56,18 +54,19 @@ func main() {
 		logger.Fatal(err.Error())
 	}
 	//redis client
-	clientRedis := redis.NewClient(&redis.Options{
-		Addr:     cfg.Addr,
-		Password: cfg.Redis.Password,
-		DB:       cfg.DB,
-	})
+	//clientRedis := redis.NewClient(&redis.Options{
+	//	Addr:     cfg.Addr,
+	//	Password: cfg.Redis.Password,
+	//	DB:       cfg.DB,
+	//})
 	//postgres repository
 	repository := db.New(dbClient, logger)
 	//redis repository
-	repRedis := r.New(clientRedis, logger)
+	//repRedis := r.New(clientRedis, logger)
 	//new TTL
 	//service
-	ttl := ttl.NewTTL(repository, logger, repRedis, cfg)
+	//ttl := ttl.New(repository, logger, repRedis, cfg)
+	ttl := ttl.New(repository, logger, cfg)
 
 	srvc := service.New(repository, ttl)
 
@@ -107,7 +106,7 @@ func main() {
 	}()
 
 	logger.Infow(fmt.Sprintf("Starting HTTP server on %s", cfg.Address))
-	go ttl.Start(context.Background(), exit)
+	go ttl.Start(exit)
 
 	if err := server.ListenAndServe(); err != http.ErrServerClosed {
 		log.Fatalf("HTTP server ListenAndServe Error: %v", err)

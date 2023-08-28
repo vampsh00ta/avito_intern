@@ -71,7 +71,7 @@ func (d *Db) DeleteSegmentsFromUser(ctx context.Context, userId int, segments ..
          and 
        us.segment_id in (select id from segments  as s where s.slug in ( `
 	for i, segment := range segments {
-		toAdd := fmt.Sprintf(`$,`, i+2)
+		toAdd := fmt.Sprintf(`$%d,`, i+2)
 		q += toAdd
 		args = append(args, segment.Slug)
 
