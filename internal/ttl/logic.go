@@ -74,6 +74,6 @@ func (t *TTLMonitor) Start(ctx context.Context, exit chan struct{}) {
 			}
 
 		}
-		time.Sleep(time.Second * 5)
+		time.Sleep(t.cfg.TimeUpdate)
 	}
 }

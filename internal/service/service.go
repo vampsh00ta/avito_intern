@@ -32,7 +32,8 @@ type User interface {
 }
 
 type Segment interface {
-	CreateSegment(ctx context.Context, slug string) error
+	CreateSegment(ctx context.Context, segment rep.Segment) error
+	CreateSegmentPercent(ctx context.Context, segment rep.Segment) ([]rep.User, error)
 	DeleteSegment(ctx context.Context, slug string) error
 }
 type History interface {

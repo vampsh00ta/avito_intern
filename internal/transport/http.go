@@ -1,6 +1,7 @@
 package transport
 
 import (
+	db "avito/internal/db"
 	"avito/internal/response"
 	"avito/internal/service"
 	"avito/internal/transport/model"
@@ -96,7 +97,7 @@ func (h HttpServer) DeleteUser(w http.ResponseWriter, r *http.Request) {
 
 func (h HttpServer) AddSegment(w http.ResponseWriter, r *http.Request) {
 	var req model.RequestCreateOrDeleteSegment
-
+	auto := r.URL.Query().Get("auto")
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		fmt.Println(req)
 		http.Error(w, "validation error", http.StatusBadRequest)
@@ -106,14 +107,22 @@ func (h HttpServer) AddSegment(w http.ResponseWriter, r *http.Request) {
 		return
 
 	}
-	if err := h.service.CreateSegment(r.Context(), req.Slug); err != nil {
+	var res []db.User
+	var err error
+
+	if auto != "true" {
+		err = h.service.CreateSegment(r.Context(), req.Segment)
+	} else {
+		res, err = h.service.CreateSegmentPercent(r.Context(), req.Segment)
+	}
+	if err != nil {
 		response.ReturnError(w, r, err)
 		return
 	}
 	w.WriteHeader(201)
 	h.log.Infow("AddSegment", "method", r.Method, "status", 201)
 
-	response.ReturnOk(w, r)
+	response.ReturnOkData(w, r, res)
 	return
 }
 

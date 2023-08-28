@@ -32,6 +32,16 @@ const (
 	emptyValue = "empty value"
 )
 
+func (d *Db) GetUserIds(ctx context.Context) ([]int, error) {
+	q := `select id  from  users`
+	rows, err := d.client.Query(ctx, q)
+	if d.PgError(err) != nil {
+		return nil, d.PgError(err)
+	}
+	ids, err := pgx.CollectRows(rows, pgx.RowTo[int])
+	return ids, nil
+
+}
 func (d *Db) GetUsersSegments(ctx context.Context, userId int) ([]Segment, error) {
 	q := `select slug  from  segments  as s
     inner join  user_segment as us on s.id=us.segment_id
@@ -69,7 +79,7 @@ func (d *Db) DeleteSegmentsFromUser(ctx context.Context, userId int, slugs ...an
 	if err := tx.QueryRow(ctx, q, userId).Scan(); d.PgError(err) != nil {
 		return d.PgError(err)
 	}
-	if err := d.AddToHistory(ctx, tx, userId, false, slugs...); d.PgError(err) != nil {
+	if err := d.AddToHistoryUserSlugs(ctx, tx, userId, false, slugs...); d.PgError(err) != nil {
 		if errtx := tx.Rollback(ctx); errtx != nil {
 			return errors.New("tx error")
 		}
@@ -97,7 +107,7 @@ func (d *Db) AddSegmentsToUser(ctx context.Context, userId int, slugs ...any) (e
 	if err := tx.QueryRow(ctx, q, args...).Scan(); d.PgError(err) != nil {
 		return d.PgError(err)
 	}
-	if err := d.AddToHistory(ctx, tx, userId, true, slugs...); d.PgError(err) != nil {
+	if err := d.AddToHistoryUserSlugs(ctx, tx, userId, true, slugs...); d.PgError(err) != nil {
 		if errtx := tx.Rollback(ctx); errtx != nil {
 			return errors.New("tx error")
 		}
@@ -105,7 +115,35 @@ func (d *Db) AddSegmentsToUser(ctx context.Context, userId int, slugs ...any) (e
 	}
 	return nil
 }
+func (d *Db) AddSlugIdToUsers(ctx context.Context, slugId int, ids ...int) (err error) {
+	tx, err := d.client.Begin(ctx)
+	defer tx.Commit(ctx)
+	if err != nil {
+		return d.PgError(err)
+	}
 
+	q := `insert into user_segment (user_id,segment_id) values `
+	var args = []any{slugId}
+
+	for i, id := range ids {
+		toAdd := fmt.Sprintf(`($%d,$1),`, i+2)
+		q += toAdd
+		args = append(args, id)
+
+	}
+	q = q[0 : len(q)-1]
+
+	if err := tx.QueryRow(ctx, q, args...).Scan(); d.PgError(err) != nil {
+		return d.PgError(err)
+	}
+	if err := d.AddToHistorySlugUsers(ctx, tx, slugId, true, ids...); d.PgError(err) != nil {
+		if errtx := tx.Rollback(ctx); errtx != nil {
+			return errors.New("tx error")
+		}
+		return d.PgError(err)
+	}
+	return nil
+}
 func (d *Db) CreateUser(ctx context.Context, username string) error {
 	q := `insert into users (username) values ($1) `
 	if err := d.client.QueryRow(ctx, q, username).Scan(); err != nil {
@@ -122,12 +160,13 @@ func (d *Db) DeleteUser(ctx context.Context, id int) error {
 	return nil
 }
 
-func (d *Db) CreateSegment(ctx context.Context, slug string) error {
-	q := `insert into segments (slug) values ($1)`
-	if err := d.client.QueryRow(ctx, q, slug).Scan(); err != nil {
-		return d.PgError(err)
+func (d *Db) CreateSegment(ctx context.Context, slug string) (int, error) {
+	q := `insert into segments (slug) values ($1) returning id`
+	var id int
+	if err := d.client.QueryRow(ctx, q, slug).Scan(&id); err != nil {
+		return -1, d.PgError(err)
 	}
-	return nil
+	return id, nil
 }
 
 func (d *Db) DeleteSegment(ctx context.Context, slug string) error {
@@ -138,7 +177,33 @@ func (d *Db) DeleteSegment(ctx context.Context, slug string) error {
 	return nil
 }
 
-func (d *Db) AddToHistory(ctx context.Context, tx pgx.Tx, userId int, operationType bool, slugs ...any) error {
+func (d *Db) AddToHistorySlugUsers(ctx context.Context, tx pgx.Tx, slugId int, operationType bool, ids ...int) error {
+
+	var operationStr string
+	if operationType {
+		operationStr = "insert"
+	} else {
+		operationStr = "delete"
+	}
+	var args []any = []any{slugId, operationStr, time.Now()}
+
+	q := `insert into history (user_id,slug,operation,update_time) values `
+
+	for i, id := range ids {
+		toAdd := fmt.Sprintf(` ($%d,$1,$2,$3),`, i+4)
+		q += toAdd
+		args = append(args, id)
+	}
+	q = q[0 : len(q)-1]
+	fmt.Println(q, ids)
+	if err := tx.QueryRow(ctx, q, args...).Scan(); d.PgError(err) != nil {
+		fmt.Println(err)
+		return d.PgError(err)
+	}
+	return nil
+}
+
+func (d *Db) AddToHistoryUserSlugs(ctx context.Context, tx pgx.Tx, userId int, operationType bool, slugs ...any) error {
 	var operationStr string
 	if operationType {
 		operationStr = "insert"
@@ -174,6 +239,5 @@ func (d *Db) GetHistory(ctx context.Context, userId int, year, month int) ([]His
 		return nil, d.PgError(err)
 	}
 	history, err := pgx.CollectRows(rows, pgx.RowToStructByName[HistoryRow])
-	fmt.Println(history)
 	return history, nil
 }

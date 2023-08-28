@@ -16,15 +16,19 @@ type UserRepository interface {
 	CreateUser(ctx context.Context, username string) error
 	DeleteUser(ctx context.Context, id int) error
 	AddSegmentsToUser(ctx context.Context, userId int, slugs ...any) error
+	AddSlugIdToUsers(ctx context.Context, slugId int, ids ...int) error
+
 	GetUsersSegments(ctx context.Context, userId int) ([]Segment, error)
 	DeleteSegmentsFromUser(ctx context.Context, userId int, slugs ...any) error
+	GetUserIds(ctx context.Context) ([]int, error)
 }
 type SegmentRepository interface {
-	CreateSegment(ctx context.Context, slug string) error
+	CreateSegment(ctx context.Context, slug string) (int, error)
 	DeleteSegment(ctx context.Context, slug string) error
 }
 type History interface {
-	AddToHistory(ctx context.Context, tx pgx.Tx, userId int, operationType bool, slugs ...any) error
+	AddToHistoryUserSlugs(ctx context.Context, tx pgx.Tx, userId int, operationType bool, slugs ...any) error
+	AddToHistorySlugUsers(ctx context.Context, tx pgx.Tx, slugId int, operationType bool, ids ...int) error
 	GetHistory(ctx context.Context, userId int, year, month int) ([]HistoryRow, error)
 }
 type Db struct {

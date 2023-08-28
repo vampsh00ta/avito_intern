@@ -1,6 +1,7 @@
 package ttl
 
 import (
+	"avito/config"
 	rep "avito/internal/db"
 	"avito/internal/redis"
 	"context"
@@ -12,6 +13,7 @@ type TTLMonitor struct {
 	rep    rep.Repository
 	logger *zap.SugaredLogger
 	redis  redis.Repository
+	cfg    *config.Config
 }
 type TTL interface {
 	Collect(args *[]string, userId int, slug string, time time.Time)
@@ -19,10 +21,11 @@ type TTL interface {
 	DelUsersSegments(ctx context.Context, slugs ...string) error
 }
 
-func NewTTL(rep rep.Repository, logger *zap.SugaredLogger, redis redis.Repository) *TTLMonitor {
+func NewTTL(rep rep.Repository, logger *zap.SugaredLogger, redis redis.Repository, cfg *config.Config) *TTLMonitor {
 	return &TTLMonitor{
 		rep:    rep,
 		logger: logger,
 		redis:  redis,
+		cfg:    cfg,
 	}
 }

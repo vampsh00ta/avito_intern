@@ -42,11 +42,14 @@ import (
 
 func main() {
 
-	//config
-	cfg := config.Load()
 	//logger
 	logger := LoadLoggerDev()
 
+	//config
+	cfg, err := config.Load()
+	if err != nil {
+		logger.Fatal(err.Error())
+	}
 	//postgres client
 	dbClient, err := postgresql.NewClient(context.Background(), 5, cfg.DBConfig)
 	if err != nil {
@@ -54,9 +57,9 @@ func main() {
 	}
 	//redis client
 	clientRedis := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "",
-		DB:       0,
+		Addr:     cfg.Addr,
+		Password: cfg.Redis.Password,
+		DB:       cfg.DB,
 	})
 	//postgres repository
 	repository := db.New(dbClient, logger)
@@ -64,7 +67,7 @@ func main() {
 	repRedis := r.New(clientRedis, logger)
 	//new TTL
 	//service
-	ttl := ttl.NewTTL(repository, logger, repRedis)
+	ttl := ttl.NewTTL(repository, logger, repRedis, cfg)
 
 	srvc := service.New(repository, ttl)
 
@@ -77,14 +80,14 @@ func main() {
 		Handler: router,
 	}
 
-	router.Methods("POST").Path("/segments").HandlerFunc(httpServer.AddSegment)
+	router.Methods("POST").Path("/segments/new").HandlerFunc(httpServer.AddSegment)
 	router.Methods("DELETE").Path("/segments").HandlerFunc(httpServer.DeleteSegment)
 
 	router.Methods("POST").Path("/user/new").HandlerFunc(httpServer.CreateUser)
 	router.Methods("DELETE").Path("/user").HandlerFunc(httpServer.DeleteUser)
 
 	router.Methods("GET").Path("/user/segments/{id}/").HandlerFunc(httpServer.GetUsersSegments)
-	router.Methods("POST").Path("/user/segments").HandlerFunc(httpServer.AddSegmentsToUser)
+	router.Methods("POST").Path("/user/segments/new").HandlerFunc(httpServer.AddSegmentsToUser)
 	router.Methods("DELETE").Path("/user/segments").HandlerFunc(httpServer.DeleteSegmentsFromUser)
 
 	router.Methods("GET").Path("/history").HandlerFunc(httpServer.GetHistory)
