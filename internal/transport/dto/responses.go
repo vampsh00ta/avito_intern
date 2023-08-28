@@ -1,6 +1,8 @@
-package model
+package dto
 
-import db "avito/internal/db"
+import (
+	db "avito/internal/db"
+)
 
 type ResponseGetUsersSegments struct {
 	User

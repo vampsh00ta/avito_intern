@@ -15,11 +15,11 @@ type Repository interface {
 type UserRepository interface {
 	CreateUser(ctx context.Context, username string) error
 	DeleteUser(ctx context.Context, id int) error
-	AddSegmentsToUser(ctx context.Context, userId int, segments ...Segment) error
+	AddSegmentsToUser(ctx context.Context, userId int, segments ...*Segment) error
 	AddSlugIdToUsers(ctx context.Context, segment Segment, ids ...int) error
 
 	GetUsersSegments(ctx context.Context, userId int) ([]Segment, error)
-	DeleteSegmentsFromUser(ctx context.Context, userId int, segment ...Segment) error
+	DeleteSegmentsFromUser(ctx context.Context, userId int, segment ...*Segment) error
 	GetUserIds(ctx context.Context) ([]int, error)
 }
 type SegmentRepository interface {
@@ -27,9 +27,9 @@ type SegmentRepository interface {
 	DeleteSegment(ctx context.Context, segment Segment) error
 }
 type History interface {
-	AddToHistoryUserSlugs(ctx context.Context, tx pgx.Tx, userId int, operationType bool, segments ...Segment) error
+	AddToHistoryUserSlugs(ctx context.Context, tx pgx.Tx, userId int, operationType bool, segments ...*Segment) error
 	AddToHistorySlugUsers(ctx context.Context, tx pgx.Tx, segment Segment, operationType bool, ids ...int) error
-	GetHistory(ctx context.Context, userId int, year, month int) ([]HistoryRow, error)
+	GetHistory(ctx context.Context, userId int, year, month int) (*[]HistoryRow, error)
 }
 type Db struct {
 	client postgresql.Client

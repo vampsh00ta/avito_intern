@@ -62,7 +62,7 @@ func (d *Db) GetUsersSegments(ctx context.Context, userId int) ([]Segment, error
 
 }
 
-func (d *Db) DeleteSegmentsFromUser(ctx context.Context, userId int, segments ...Segment) (err error) {
+func (d *Db) DeleteSegmentsFromUser(ctx context.Context, userId int, segments ...*Segment) (err error) {
 	tx, err := d.client.Begin(ctx)
 	defer tx.Commit(ctx)
 	var args []any = []any{userId}
@@ -88,7 +88,7 @@ func (d *Db) DeleteSegmentsFromUser(ctx context.Context, userId int, segments ..
 	}
 	return nil
 }
-func (d *Db) AddSegmentsToUser(ctx context.Context, userId int, segments ...Segment) (err error) {
+func (d *Db) AddSegmentsToUser(ctx context.Context, userId int, segments ...*Segment) (err error) {
 	tx, err := d.client.Begin(ctx)
 	defer tx.Commit(ctx)
 	if err != nil {
@@ -202,7 +202,7 @@ func (d *Db) AddToHistorySlugUsers(ctx context.Context, tx pgx.Tx, segment Segme
 	return nil
 }
 
-func (d *Db) AddToHistoryUserSlugs(ctx context.Context, tx pgx.Tx, userId int, operationType bool, segments ...Segment) error {
+func (d *Db) AddToHistoryUserSlugs(ctx context.Context, tx pgx.Tx, userId int, operationType bool, segments ...*Segment) error {
 	var operationStr string
 	if operationType {
 		operationStr = "insert"
@@ -226,7 +226,7 @@ func (d *Db) AddToHistoryUserSlugs(ctx context.Context, tx pgx.Tx, userId int, o
 	return nil
 
 }
-func (d *Db) GetHistory(ctx context.Context, userId int, year, month int) ([]HistoryRow, error) {
+func (d *Db) GetHistory(ctx context.Context, userId int, year, month int) (*[]HistoryRow, error) {
 	q := `select user_id,slug,operation,update_time from  history
 		  where user_id = $1 and
 		  date_part('year', update_time) = $2 and 
@@ -238,5 +238,5 @@ func (d *Db) GetHistory(ctx context.Context, userId int, year, month int) ([]His
 		return nil, d.PgError(err)
 	}
 	history, err := pgx.CollectRows(rows, pgx.RowToStructByName[HistoryRow])
-	return history, nil
+	return &history, nil
 }

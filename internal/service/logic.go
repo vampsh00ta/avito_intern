@@ -20,7 +20,7 @@ func (s service) DeleteUser(ctx context.Context, userId int) error {
 	return s.rep.DeleteUser(ctx, userId)
 }
 
-func (s service) AddSegmentsToUser(ctx context.Context, userId int, segments ...rep.Segment) error {
+func (s service) AddSegmentsToUser(ctx context.Context, userId int, segments ...*rep.Segment) error {
 	var slugs []any
 	//var ttlSlugs []string
 	for _, segment := range segments {
@@ -31,7 +31,7 @@ func (s service) AddSegmentsToUser(ctx context.Context, userId int, segments ...
 			minutes := time.Duration(segment.Expire.Minutes) * time.Minute
 
 			timeEnds := time.Now().Add(days + hours + minutes)
-			s.ttl.Set(userId, segment, timeEnds)
+			s.ttl.Set(userId, segment.Slug, timeEnds)
 			//s.ttl.Collect(&ttlSlugs, userId, segment.Slug, timeEnds)
 		}
 
@@ -49,7 +49,7 @@ func (s service) AddSegmentsToUser(ctx context.Context, userId int, segments ...
 func (s service) GetUsersSegments(ctx context.Context, userId int) ([]rep.Segment, error) {
 	return s.rep.GetUsersSegments(ctx, userId)
 }
-func (s service) DeleteSegmentsFromUser(ctx context.Context, userId int, segments ...rep.Segment) (err error) {
+func (s service) DeleteSegmentsFromUser(ctx context.Context, userId int, segments ...*rep.Segment) (err error) {
 	var keysToDelete []string
 	for _, segment := range segments {
 		key := strconv.Itoa(userId) + ":" + segment.Slug
@@ -62,7 +62,7 @@ func (s service) DeleteSegmentsFromUser(ctx context.Context, userId int, segment
 	s.ttl.Delete(keysToDelete...)
 	return nil
 }
-func (s service) CreateSegmentPercent(ctx context.Context, segment rep.Segment) ([]rep.User, error) {
+func (s service) CreateSegmentPercent(ctx context.Context, segment rep.Segment) (*[]rep.User, error) {
 	slugId, err := s.rep.CreateSegment(ctx, segment)
 	if err != nil {
 		return nil, err
@@ -78,6 +78,7 @@ func (s service) CreateSegmentPercent(ctx context.Context, segment rep.Segment) 
 	if len(userIds) == 0 {
 		return nil, errors.New("null users")
 	}
+
 	rand.Seed(time.Now().UnixNano())
 	rand.Shuffle(len(userIds), func(i, j int) { userIds[i], userIds[j] = userIds[j], userIds[i] })
 	var percent float64 = float64(segment.RandomSeed) / 100
@@ -91,7 +92,7 @@ func (s service) CreateSegmentPercent(ctx context.Context, segment rep.Segment) 
 	for _, id := range shuffledUserIds {
 		users = append(users, rep.User{id})
 	}
-	return users, nil
+	return &users, nil
 }
 func (s service) CreateSegment(ctx context.Context, segment rep.Segment) error {
 
@@ -107,7 +108,7 @@ func (s service) DeleteSegment(ctx context.Context, segment rep.Segment) error {
 
 }
 
-func (s service) GetHistory(ctx context.Context, userId, year, month int) ([]rep.HistoryRow, error) {
+func (s service) GetHistory(ctx context.Context, userId, year, month int) (*[]rep.HistoryRow, error) {
 	history, err := s.rep.GetHistory(ctx, userId, year, month)
 	if err != nil {
 		return nil, err

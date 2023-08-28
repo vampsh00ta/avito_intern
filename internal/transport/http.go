@@ -4,7 +4,7 @@ import (
 	db "avito/internal/db"
 	"avito/internal/response"
 	"avito/internal/service"
-	"avito/internal/transport/model"
+	"avito/internal/transport/dto"
 	"encoding/json"
 	"fmt"
 	"github.com/go-playground/validator/v10"
@@ -46,7 +46,7 @@ func NewHttpServer(service service.Service, logger *zap.SugaredLogger) Transport
 //	@Failure		500	{string}	string	"ok"
 //	@Router			/user/new [post]
 func (h HttpServer) CreateUser(w http.ResponseWriter, r *http.Request) {
-	var req model.RequestCreateOrDeleteUser
+	var req dto.RequestCreateOrDeleteUser
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		h.log.Errorf("CreateUser", "mehthod", r.Method, "error", err)
 		//val := err.(json.InvalidUnmarshalError)
@@ -68,13 +68,13 @@ func (h HttpServer) CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(201)
 	h.log.Infow("CreateUser", "method", r.Method, "status", 201)
-	response.ReturnOk(w, r)
+	response.ReturnOk(w)
 	return
 
 }
 
 func (h HttpServer) DeleteUser(w http.ResponseWriter, r *http.Request) {
-	var req model.User
+	var req dto.User
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		fmt.Println(req)
@@ -91,12 +91,12 @@ func (h HttpServer) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(201)
 	h.log.Infow("DeleteUser", "method", r.Method, "status", 201)
-	response.ReturnOk(w, r)
+	response.ReturnOk(w)
 	return
 }
 
 func (h HttpServer) AddSegment(w http.ResponseWriter, r *http.Request) {
-	var req model.RequestCreateOrDeleteSegment
+	var req dto.RequestCreateOrDeleteSegment
 	auto := r.URL.Query().Get("auto")
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		fmt.Println(req)
@@ -107,7 +107,7 @@ func (h HttpServer) AddSegment(w http.ResponseWriter, r *http.Request) {
 		return
 
 	}
-	var res []db.User
+	var res *[]db.User
 	var err error
 
 	if auto != "true" {
@@ -122,12 +122,12 @@ func (h HttpServer) AddSegment(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(201)
 	h.log.Infow("AddSegment", "method", r.Method, "status", 201)
 
-	response.ReturnOkData(w, r, res)
+	response.ReturnOkData(w, res)
 	return
 }
 
 func (h HttpServer) DeleteSegment(w http.ResponseWriter, r *http.Request) {
-	var req model.RequestCreateOrDeleteSegment
+	var req dto.RequestCreateOrDeleteSegment
 
 	h.log.Info("DeleteSegment")
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -144,7 +144,7 @@ func (h HttpServer) DeleteSegment(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(200)
 	h.log.Infow("DeleteSegment", "method", r.Method, "status", 200)
-	response.ReturnOk(w, r)
+	response.ReturnOk(w)
 	return
 }
 
@@ -166,12 +166,12 @@ func (h HttpServer) GetUsersSegments(w http.ResponseWriter, r *http.Request) {
 	}
 	h.log.Infow("GetUsersSegments", "method", r.Method, "status", 200)
 
-	response.ReturnOkData(w, r, model.ResponseGetUsersSegments{model.User{id}, segments})
+	response.ReturnOkData(w, dto.ResponseGetUsersSegments{dto.User{id}, segments})
 	return
 
 }
 func (h HttpServer) AddSegmentsToUser(w http.ResponseWriter, r *http.Request) {
-	var req model.RequestAddOrDeleteSegmentsToUser
+	var req dto.RequestAddOrDeleteSegmentsToUser
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "validation error", http.StatusBadRequest)
 		h.log.Error("transport:AddSegmentsToUser ", zap.String("data", err.Error()))
@@ -187,12 +187,12 @@ func (h HttpServer) AddSegmentsToUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.log.Infow("AddSegmentsToUser", "method", r.Method, "status", 200)
-	response.ReturnOk(w, r)
+	response.ReturnOk(w)
 	return
 }
 
 func (h HttpServer) DeleteSegmentsFromUser(w http.ResponseWriter, r *http.Request) {
-	var req model.RequestAddOrDeleteSegmentsToUser
+	var req dto.RequestAddOrDeleteSegmentsToUser
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "validation error", http.StatusBadRequest)
 		h.log.Error("transport:DeleteSegmentsFromUser ", zap.String("data", err.Error()))
@@ -208,12 +208,12 @@ func (h HttpServer) DeleteSegmentsFromUser(w http.ResponseWriter, r *http.Reques
 	w.WriteHeader(200)
 	h.log.Infow("AddSegmentsToUser", "method", r.Method, "status", 200)
 
-	response.ReturnOk(w, r)
+	response.ReturnOk(w)
 	return
 }
 
 func (h HttpServer) GetHistory(w http.ResponseWriter, r *http.Request) {
-	var req model.RequestGetHistory
+	var req dto.RequestGetHistory
 	if err := decoder.Decode(&req, r.URL.Query()); err != nil {
 		h.log.Error("transport:GetHistory ", zap.String("data", err.Error()))
 		response.ReturnError(w, r, err)
@@ -234,7 +234,5 @@ func (h HttpServer) GetHistory(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/csv")
 	gocsv.Marshal(history, w)
 
-	//gocsv.Marshal(tests, rw)
-	//response.ReturnOkData(w, r, history)
 	return
 }

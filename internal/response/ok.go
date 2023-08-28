@@ -11,7 +11,7 @@ type Response struct {
 	Response interface{} `json:"response,omitempty"`
 }
 
-func ReturnOk(w http.ResponseWriter, r *http.Request) {
+func ReturnOk(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(
 		Response{
@@ -20,7 +20,7 @@ func ReturnOk(w http.ResponseWriter, r *http.Request) {
 	)
 	return
 }
-func ReturnOkData(w http.ResponseWriter, r *http.Request, data interface{}) {
+func ReturnOkData(w http.ResponseWriter, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(
 		Response{

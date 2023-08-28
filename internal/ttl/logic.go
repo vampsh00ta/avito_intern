@@ -82,8 +82,8 @@ import (
 //		key := strconv.Itoa(userId) + ":" + slug
 //		*args = append(*args, Item{key: key, value: tm})
 //	}
-func (t *TTLCache) Set(userId int, segment rep.Segment, expireTime time.Time) {
-	key := strconv.Itoa(userId) + ":" + segment.Slug
+func (t *TTLCache) Set(userId int, slug string, expireTime time.Time) {
+	key := strconv.Itoa(userId) + ":" + slug
 	t.cache.Lock()
 	t.cache.storage[key] = expireTime
 	t.cache.Unlock()
@@ -119,7 +119,7 @@ func (t *TTLCache) Start(exit chan struct{}) {
 						continue
 					}
 					slug := splitedKey[1]
-					if err := t.rep.DeleteSegmentsFromUser(context.Background(), userId, rep.Segment{Slug: slug}); err != nil {
+					if err := t.rep.DeleteSegmentsFromUser(context.Background(), userId, &rep.Segment{Slug: slug}); err != nil {
 						t.logger.Errorw("db err", "error", err)
 						continue
 					}

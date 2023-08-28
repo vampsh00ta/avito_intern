@@ -1,4 +1,4 @@
-package model
+package dto
 
 import db "avito/internal/db"
 
@@ -20,7 +20,7 @@ type RequestCreateOrDeleteSegment struct {
 // }
 type RequestAddOrDeleteSegmentsToUser struct {
 	User
-	Segments []db.Segment `json:"slugs" validate:"required"`
+	Segments []*db.Segment `json:"slugs" validate:"required"`
 }
 
 type RequestGetHistory struct {

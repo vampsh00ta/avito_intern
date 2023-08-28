@@ -19,7 +19,7 @@ type TTLCache struct {
 	cache  *Cache
 }
 type TTL interface {
-	Set(userId int, segment rep.Segment, expireTime time.Time)
+	Set(userId int, slug string, expireTime time.Time)
 	GetAll() map[string]time.Time
 	Delete(keys ...string)
 	DeleteAll()
