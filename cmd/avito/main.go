@@ -2,6 +2,7 @@ package main
 
 import (
 	"avito/config"
+	_ "avito/docs"
 	db "avito/internal/db"
 	r "avito/internal/redis"
 	"avito/internal/service"
@@ -11,7 +12,9 @@ import (
 	"context"
 	"fmt"
 	"github.com/gorilla/mux"
+
 	"github.com/redis/go-redis/v9"
+	httpSwagger "github.com/swaggo/http-swagger/v2"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"log"
@@ -22,12 +25,23 @@ import (
 	"time"
 )
 
-type test struct {
-	time time.Time
-	slug string
-}
+//	@title			Swagger Example API
+//	@version		1.0
+//	@description	This is a sample server Petstore server.
+//	@termsOfService	http://swagger.io/terms/
+
+//	@contact.name	API Support
+//	@contact.url	http://www.swagger.io/support
+//	@contact.email	support@swagger.io
+
+//	@license.name	Apache 2.0
+//	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
+//query.collection.format multi
+//	@host			localhost:8000
+//	@BasePath		/api/v1
 
 func main() {
+
 	//config
 	cfg := config.Load()
 	//logger
@@ -74,6 +88,7 @@ func main() {
 	router.Methods("DELETE").Path("/user/segments").HandlerFunc(httpServer.DeleteSegmentsFromUser)
 
 	router.Methods("GET").Path("/history").HandlerFunc(httpServer.GetHistory)
+	router.PathPrefix("/docs").Handler(httpSwagger.WrapHandler)
 
 	exit := make(chan struct{})
 	go func() {

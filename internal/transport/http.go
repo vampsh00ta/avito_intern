@@ -31,6 +31,19 @@ func NewHttpServer(service service.Service, logger *zap.SugaredLogger) Transport
 	}
 }
 
+// PingExample godoc
+//
+//	@Summary		CreateUser
+//	@Description	Создает пользователя
+//	@Tags			User
+//	@Accept			json
+//	@Param  		username   body      model.RequestCreateOrDeleteUser  true  "Слэт"
+//	@Produce		json
+//	@Success		200 {object}  response.Response
+//	@Failure		400	{string}	string	"ok"
+//	@Failure		404	{string}	string	"ok"
+//	@Failure		500	{string}	string	"ok"
+//	@Router			/user/new [post]
 func (h HttpServer) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var req model.RequestCreateOrDeleteUser
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {

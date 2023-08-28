@@ -1,0 +1,52 @@
+definitions:
+  model.RequestCreateOrDeleteUser:
+    properties:
+      username:
+        type: string
+    type: object
+  response.Response:
+    properties:
+      error:
+        type: string
+      response: {}
+      status:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /user/new:
+    post:
+      consumes:
+      - application/json
+      description: Создает пользователя
+      parameters:
+      - description: Слэт
+        in: body
+        name: username
+        required: true
+        schema:
+          $ref: '#/definitions/model.RequestCreateOrDeleteUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: ok
+          schema:
+            type: string
+        "404":
+          description: ok
+          schema:
+            type: string
+        "500":
+          description: ok
+          schema:
+            type: string
+      summary: CreateUser
+      tags:
+      - User
+swagger: "2.0"
