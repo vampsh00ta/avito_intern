@@ -1,6 +1,9 @@
 package config
 
 import (
+	"github.com/joho/godotenv"
+	"gopkg.in/yaml.v3"
+	"os"
 	"time"
 )
 
@@ -8,7 +11,6 @@ type Config struct {
 	HTTPServer `yaml:"http_server"`
 	DBConfig   `yaml:"db"`
 	TTL        `yaml:"ttl"`
-	Redis      `yaml:"redis"`
 }
 type DBConfig struct {
 	Username string `yaml:"username" env-default:"postgres"`
@@ -17,11 +19,7 @@ type DBConfig struct {
 	Port     string `yaml:"port" env-default:"5432"`
 	Name     string `yaml:"name" env-default:"postgres"`
 }
-type Redis struct {
-	Addr     string `yaml:"addr"`
-	Password string `yaml:"password"`
-	DB       int    `yaml:"db"`
-}
+
 type HTTPServer struct {
 	Address     string        `yaml:"address" env-default:"localhost:8000"`
 	Timeout     time.Duration `yaml:"timeout" env-default:"4s"`
@@ -32,43 +30,23 @@ type TTL struct {
 }
 
 func Load() (*Config, error) {
-	//err := godotenv.Load(".env")
-	//if err != nil {
-	//	return nil, err
-	//}
-	//dir, err := os.Getwd()
-	//if err != nil {
-	//	return nil, err
-	//}
-	//
-	//configFile := fmt.Sprintf(dir+"/config/%s.yaml", os.Getenv("env"))
-	//f, err := os.Open(configFile)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//defer f.Close()
-	//var cfg Config
-	//decoder := yaml.NewDecoder(f)
-	//err = decoder.Decode(&cfg)
-	//if err != nil {
-	//	return nil, err
-	//}
+	err := godotenv.Load(".env")
+	if err != nil {
+		return nil, err
+	}
+	currPath, err := os.Getwd()
+	if err != nil {
+		return nil, err
+	}
+	filePath := currPath + os.Getenv("path") + "/" + os.Getenv("env") + ".yml"
+	file, err := os.Open(filePath)
+	defer file.Close()
+
+	d := yaml.NewDecoder(file)
 	var cfg *Config
-	cfg = &Config{
-		HTTPServer{
-			Address:     "localhost:8000",
-			Timeout:     time.Second * 4,
-			IdleTimeout: time.Second * 60,
-		},
-		DBConfig{
-			Username: "avito",
-			Password: "avito",
-			Host:     "localhost",
-			Port:     "5432",
-			Name:     "avito",
-		},
-		TTL{5},
-		Redis{DB: 0, Password: "", Addr: "localhost:6379"},
+
+	if err := d.Decode(&cfg); err != nil {
+		return nil, err
 	}
 	return cfg, nil
 

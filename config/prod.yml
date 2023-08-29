@@ -1,0 +1,13 @@
+http_server:
+  address: "0.0.0.0:8000"
+  timeout: 4s
+  idle_timeout: 60s
+
+ttl:
+  timeupdate: 5s
+db:
+  username: "avito"
+  password: "avito"
+  host: "localhost"
+  port: "5432"
+  name: "db"
