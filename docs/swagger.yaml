@@ -1,8 +1,61 @@
 definitions:
-  model.RequestCreateOrDeleteUser:
+  dto.RequestAddSegmentsToUser:
+    properties:
+      id:
+        type: integer
+      segments:
+        items:
+          $ref: '#/definitions/service.Segment_AddSegmentsToUser'
+        type: array
+    required:
+    - id
+    - segments
+    type: object
+  dto.RequestCreateSegment:
+    properties:
+      id:
+        type: integer
+      slug:
+        type: string
+      user_percent:
+        type: integer
+    required:
+    - slug
+    type: object
+  dto.RequestCreateUser:
     properties:
       username:
         type: string
+    required:
+    - username
+    type: object
+  dto.RequestDeleteSegment:
+    properties:
+      id:
+        type: integer
+      slug:
+        type: string
+    required:
+    - slug
+    type: object
+  dto.RequestDeleteSegmentsFromUser:
+    properties:
+      id:
+        type: integer
+      segments:
+        items:
+          $ref: '#/definitions/service.Segment_DeleteSegmentsFromUser'
+        type: array
+    required:
+    - id
+    - segments
+    type: object
+  dto.RequestDeleteUser:
+    properties:
+      id:
+        type: integer
+    required:
+    - id
     type: object
   response.Response:
     properties:
@@ -12,9 +65,178 @@ definitions:
       status:
         type: string
     type: object
+  service.Segment_AddSegmentsToUser:
+    properties:
+      days:
+        type: integer
+      hours:
+        type: integer
+      id:
+        type: integer
+      minutes:
+        type: integer
+      slug:
+        type: string
+    required:
+    - slug
+    type: object
+  service.Segment_DeleteSegmentsFromUser:
+    properties:
+      id:
+        type: integer
+      slug:
+        type: string
+    required:
+    - slug
+    type: object
 info:
   contact: {}
 paths:
+  /history:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает историю добавления/удаления сегментов пользователю
+      parameters:
+      - description: Id пользователя
+        in: query
+        name: user_id
+        required: true
+        type: integer
+      - description: Месяц
+        in: query
+        name: month
+        required: true
+        type: string
+      - description: Год
+        in: query
+        name: year
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: ok
+          schema:
+            type: string
+        "404":
+          description: ok
+          schema:
+            type: string
+        "500":
+          description: ok
+          schema:
+            type: string
+      summary: GetHistory
+      tags:
+      - History
+  /segment:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет сегмент
+      parameters:
+      - description: Слэт
+        in: body
+        name: slug
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RequestDeleteSegment'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: ok
+          schema:
+            type: string
+        "404":
+          description: ok
+          schema:
+            type: string
+        "500":
+          description: ok
+          schema:
+            type: string
+      summary: DeleteSegment
+      tags:
+      - Segment
+  /segment/new:
+    post:
+      consumes:
+      - application/json
+      description: Создает сегмент
+      parameters:
+      - description: Слэт
+        in: body
+        name: slug
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RequestCreateSegment'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: ok
+          schema:
+            type: string
+        "404":
+          description: ok
+          schema:
+            type: string
+        "500":
+          description: ok
+          schema:
+            type: string
+      summary: AddSegment
+      tags:
+      - Segment
+  /user:
+    delete:
+      consumes:
+      - application/json
+      description: Создает пользователя
+      parameters:
+      - description: Слэт
+        in: body
+        name: username
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RequestDeleteUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: ok
+          schema:
+            type: string
+        "404":
+          description: ok
+          schema:
+            type: string
+        "500":
+          description: ok
+          schema:
+            type: string
+      summary: DeleteUser
+      tags:
+      - User
   /user/new:
     post:
       consumes:
@@ -26,7 +248,7 @@ paths:
         name: username
         required: true
         schema:
-          $ref: '#/definitions/model.RequestCreateOrDeleteUser'
+          $ref: '#/definitions/dto.RequestCreateUser'
       produces:
       - application/json
       responses:
@@ -47,6 +269,107 @@ paths:
           schema:
             type: string
       summary: CreateUser
+      tags:
+      - User
+  /user/segments:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет сегменты пользователя
+      parameters:
+      - description: Слэт
+        in: body
+        name: segments
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RequestDeleteSegmentsFromUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: ok
+          schema:
+            type: string
+        "404":
+          description: ok
+          schema:
+            type: string
+        "500":
+          description: ok
+          schema:
+            type: string
+      summary: DeleteSegmentsFromUser
+      tags:
+      - User
+  /user/segments/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает сегметы пользователя
+      parameters:
+      - description: Слэт
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: ok
+          schema:
+            type: string
+        "404":
+          description: ok
+          schema:
+            type: string
+        "500":
+          description: ok
+          schema:
+            type: string
+      summary: GetUsersSegments
+      tags:
+      - User
+  /user/segments/new:
+    post:
+      consumes:
+      - application/json
+      description: Добавляет сегменты пользователю
+      parameters:
+      - description: Слэт
+        in: body
+        name: segments
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RequestAddSegmentsToUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: ok
+          schema:
+            type: string
+        "404":
+          description: ok
+          schema:
+            type: string
+        "500":
+          description: ok
+          schema:
+            type: string
+      summary: AddSegmentsToUser
       tags:
       - User
 swagger: "2.0"
