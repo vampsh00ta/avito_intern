@@ -1,7 +1,6 @@
 package transport
 
 import (
-	db "avito/internal/db"
 	"avito/internal/response"
 	"avito/internal/service"
 	"avito/internal/transport/dto"
@@ -38,7 +37,7 @@ func NewHttpServer(service service.Service, logger *zap.SugaredLogger) Transport
 //	@Description	Создает пользователя
 //	@Tags			User
 //	@Accept			json
-//	@Param  		username   body      model.RequestCreateOrDeleteUser  true  "Слэт"
+//	@Param  		username   body      dto.RequestCreateUser  true  "Слэт"
 //	@Produce		json
 //	@Success		200 {object}  response.Response
 //	@Failure		400	{string}	string	"ok"
@@ -46,7 +45,7 @@ func NewHttpServer(service service.Service, logger *zap.SugaredLogger) Transport
 //	@Failure		500	{string}	string	"ok"
 //	@Router			/user/new [post]
 func (h HttpServer) CreateUser(w http.ResponseWriter, r *http.Request) {
-	var req dto.RequestCreateOrDeleteUser
+	var req dto.RequestCreateUser
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		h.log.Errorf("CreateUser", "mehthod", r.Method, "error", err)
 		//val := err.(json.InvalidUnmarshalError)
@@ -73,13 +72,26 @@ func (h HttpServer) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// PingExample godoc
+//
+//	@Summary		DeleteUser
+//	@Description	Создает пользователя
+//	@Tags			User
+//	@Accept			json
+//	@Param  		username   body      dto.RequestDeleteUser  true  "Слэт"
+//	@Produce		json
+//	@Success		200 {object}  response.Response
+//	@Failure		400	{string}	string	"ok"
+//	@Failure		404	{string}	string	"ok"
+//	@Failure		500	{string}	string	"ok"
+//	@Router			/user [delete]
 func (h HttpServer) DeleteUser(w http.ResponseWriter, r *http.Request) {
-	var req dto.User
+	var req dto.RequestDeleteUser
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		fmt.Println(req)
 		http.Error(w, "validation error", http.StatusBadRequest)
-		h.log.Error("transport:AddSegment ", zap.String("data", err.Error()))
+		h.log.Error("transport:DeleteUser ", zap.String("data", err.Error()))
 
 		response.ReturnError(w, r, err)
 		return
@@ -95,8 +107,21 @@ func (h HttpServer) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
+// PingExample godoc
+//
+//	@Summary		AddSegment
+//	@Description	Создает сегмент
+//	@Tags			Segment
+//	@Accept			json
+//	@Param  		slug   body      dto.RequestCreateSegment  true  "Слэт"
+//	@Produce		json
+//	@Success		200 {object}  response.Response
+//	@Failure		400	{string}	string	"ok"
+//	@Failure		404	{string}	string	"ok"
+//	@Failure		500	{string}	string	"ok"
+//	@Router			/segment/new [post]
 func (h HttpServer) AddSegment(w http.ResponseWriter, r *http.Request) {
-	var req dto.RequestCreateOrDeleteSegment
+	var req dto.RequestCreateSegment
 	auto := r.URL.Query().Get("auto")
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		fmt.Println(req)
@@ -107,13 +132,13 @@ func (h HttpServer) AddSegment(w http.ResponseWriter, r *http.Request) {
 		return
 
 	}
-	var res *[]db.User
+	var res *[]service.User_CreateSegmentPercent
 	var err error
 
 	if auto != "true" {
-		err = h.service.CreateSegment(r.Context(), req.Segment)
+		err = h.service.CreateSegment(r.Context(), req.Segment_CreateSegment)
 	} else {
-		res, err = h.service.CreateSegmentPercent(r.Context(), req.Segment)
+		res, err = h.service.CreateSegmentPercent(r.Context(), req.Segment_CreateSegment)
 	}
 	if err != nil {
 		response.ReturnError(w, r, err)
@@ -126,8 +151,21 @@ func (h HttpServer) AddSegment(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
+// PingExample godoc
+//
+//	@Summary		DeleteSegment
+//	@Description	Удаляет сегмент
+//	@Tags			Segment
+//	@Accept			json
+//	@Param  		slug   body      dto.RequestDeleteSegment  true  "Слэт"
+//	@Produce		json
+//	@Success		200 {object}  response.Response
+//	@Failure		400	{string}	string	"ok"
+//	@Failure		404	{string}	string	"ok"
+//	@Failure		500	{string}	string	"ok"
+//	@Router			/segment [delete]
 func (h HttpServer) DeleteSegment(w http.ResponseWriter, r *http.Request) {
-	var req dto.RequestCreateOrDeleteSegment
+	var req dto.RequestDeleteSegment
 
 	h.log.Info("DeleteSegment")
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -138,7 +176,7 @@ func (h HttpServer) DeleteSegment(w http.ResponseWriter, r *http.Request) {
 		return
 
 	}
-	if err := h.service.DeleteSegment(r.Context(), req.Segment); err != nil {
+	if err := h.service.DeleteSegment(r.Context(), req.Segment_DeleteSegment); err != nil {
 		response.ReturnError(w, r, err)
 		return
 	}
@@ -148,6 +186,19 @@ func (h HttpServer) DeleteSegment(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
+// PingExample godoc
+//
+//	@Summary		GetUsersSegments
+//	@Description	Возвращает сегметы пользователя
+//	@Tags			User
+//	@Accept			json
+//	@Param  		id   path  int      true  "Слэт"
+//	@Produce		json
+//	@Success		200 {object}  response.Response
+//	@Failure		400	{string}	string	"ok"
+//	@Failure		404	{string}	string	"ok"
+//	@Failure		500	{string}	string	"ok"
+//	@Router			/user/segments/{id} [get]
 func (h HttpServer) GetUsersSegments(w http.ResponseWriter, r *http.Request) {
 	h.log.Info("GetUsersSegments ")
 
@@ -170,8 +221,22 @@ func (h HttpServer) GetUsersSegments(w http.ResponseWriter, r *http.Request) {
 	return
 
 }
+
+// PingExample godoc
+//
+//	@Summary		AddSegmentsToUser
+//	@Description	Добавляет сегменты пользователю
+//	@Tags			User
+//	@Accept			json
+//	@Param  		id    segments  body  dto.RequestAddSegmentsToUser    true  "Слэт"
+//	@Produce		json
+//	@Success		200 {object}  response.Response
+//	@Failure		400	{string}	string	"ok"
+//	@Failure		404	{string}	string	"ok"
+//	@Failure		500	{string}	string	"ok"
+//	@Router			/user/segments/new [post]
 func (h HttpServer) AddSegmentsToUser(w http.ResponseWriter, r *http.Request) {
-	var req dto.RequestAddOrDeleteSegmentsToUser
+	var req dto.RequestAddSegmentsToUser
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "validation error", http.StatusBadRequest)
 		h.log.Error("transport:AddSegmentsToUser ", zap.String("data", err.Error()))
@@ -180,7 +245,7 @@ func (h HttpServer) AddSegmentsToUser(w http.ResponseWriter, r *http.Request) {
 		return
 
 	}
-
+	fmt.Println(req.Segments)
 	if err := h.service.AddSegmentsToUser(r.Context(), req.Id, req.Segments...); err != nil {
 		response.ReturnError(w, r, err)
 		return
@@ -191,8 +256,21 @@ func (h HttpServer) AddSegmentsToUser(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
+// PingExample godoc
+//
+//	@Summary		DeleteSegmentsFromUser
+//	@Description	Удаляет сегменты пользователя
+//	@Tags			User
+//	@Accept			json
+//	@Param  		id    segments  body  dto.RequestDeleteSegmentsFromUser    true  "Слэт"
+//	@Produce		json
+//	@Success		200 {object}  response.Response
+//	@Failure		400	{string}	string	"ok"
+//	@Failure		404	{string}	string	"ok"
+//	@Failure		500	{string}	string	"ok"
+//	@Router			/user/segments [delete]
 func (h HttpServer) DeleteSegmentsFromUser(w http.ResponseWriter, r *http.Request) {
-	var req dto.RequestAddOrDeleteSegmentsToUser
+	var req dto.RequestDeleteSegmentsFromUser
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "validation error", http.StatusBadRequest)
 		h.log.Error("transport:DeleteSegmentsFromUser ", zap.String("data", err.Error()))
@@ -206,12 +284,27 @@ func (h HttpServer) DeleteSegmentsFromUser(w http.ResponseWriter, r *http.Reques
 		return
 	}
 	w.WriteHeader(200)
-	h.log.Infow("AddSegmentsToUser", "method", r.Method, "status", 200)
+	h.log.Infow("DeleteSegmentsFromUser", "method", r.Method, "status", 200)
 
 	response.ReturnOk(w)
 	return
 }
 
+// PingExample godoc
+//
+//	@Summary		GetHistory
+//	@Description	Возвращает историю добавления/удаления сегментов пользователю
+//	@Tags			History
+//	@Accept			json
+//	@Param  		user_id query int  true "Id пользователя"
+//	@Param  		month  query  string  true "Месяц"
+//	@Param  		year  query  string true "Год"
+//	@Produce		json
+//	@Success		200 {object}  response.Response
+//	@Failure		400	{string}	string	"ok"
+//	@Failure		404	{string}	string	"ok"
+//	@Failure		500	{string}	string	"ok"
+//	@Router			/history [get]
 func (h HttpServer) GetHistory(w http.ResponseWriter, r *http.Request) {
 	var req dto.RequestGetHistory
 	if err := decoder.Decode(&req, r.URL.Query()); err != nil {

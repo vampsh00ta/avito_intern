@@ -79,15 +79,14 @@ func main() {
 		Handler: router,
 	}
 
-	router.Methods("POST").Path("/segments/new").HandlerFunc(httpServer.AddSegment)
-	router.Methods("DELETE").Path("/segments").HandlerFunc(httpServer.DeleteSegment)
-
 	router.Methods("POST").Path("/user/new").HandlerFunc(httpServer.CreateUser)
 	router.Methods("DELETE").Path("/user").HandlerFunc(httpServer.DeleteUser)
-
-	router.Methods("GET").Path("/user/segments/{id}/").HandlerFunc(httpServer.GetUsersSegments)
+	router.Methods("GET").Path("/user/segments/{id}").HandlerFunc(httpServer.GetUsersSegments)
 	router.Methods("POST").Path("/user/segments/new").HandlerFunc(httpServer.AddSegmentsToUser)
 	router.Methods("DELETE").Path("/user/segments").HandlerFunc(httpServer.DeleteSegmentsFromUser)
+
+	router.Methods("POST").Path("/segment/new").HandlerFunc(httpServer.AddSegment)
+	router.Methods("DELETE").Path("/segment").HandlerFunc(httpServer.DeleteSegment)
 
 	router.Methods("GET").Path("/history").HandlerFunc(httpServer.GetHistory)
 	router.PathPrefix("/docs").Handler(httpSwagger.WrapHandler)

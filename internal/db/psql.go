@@ -104,7 +104,7 @@ func (d *Db) AddSegmentsToUser(ctx context.Context, userId int, segments ...*Seg
 
 	}
 	q = q[0:len(q)-1] + ")"
-
+	fmt.Println(q)
 	if err := tx.QueryRow(ctx, q, args...).Scan(); d.PgError(err) != nil {
 		return d.PgError(err)
 	}

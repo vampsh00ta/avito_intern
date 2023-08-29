@@ -1,26 +1,33 @@
 package dto
 
-import db "avito/internal/db"
+import (
+	"avito/internal/service"
+)
 
 type User struct {
 	Id int `json:"id" validate:"required"`
 }
 
-type RequestCreateOrDeleteUser struct {
+type RequestCreateUser struct {
 	Username string `json:"username" validate:"required"`
 }
-type RequestCreateOrDeleteSegment struct {
-	db.Segment
+type RequestDeleteUser struct {
+	User
+}
+type RequestCreateSegment struct {
+	service.Segment_CreateSegment `validate:"required"`
+}
+type RequestDeleteSegment struct {
+	service.Segment_DeleteSegment
 }
 
-//	type AddOrDeleteSegmentsToUser_Segment struct {
-//		Segments []db.Segment `json:"slugs" validate:"required"`
-//		Expire int    `json:"expire,omitempty" `
-//
-// }
-type RequestAddOrDeleteSegmentsToUser struct {
+type RequestAddSegmentsToUser struct {
 	User
-	Segments []*db.Segment `json:"slugs" validate:"required"`
+	Segments []*service.Segment_AddSegmentsToUser `json:"segments" validate:"required"`
+}
+type RequestDeleteSegmentsFromUser struct {
+	User
+	Segments []*service.Segment_DeleteSegmentsFromUser `json:"segments" validate:"required"`
 }
 
 type RequestGetHistory struct {

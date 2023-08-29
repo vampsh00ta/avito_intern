@@ -3,20 +3,10 @@ package repository
 import "time"
 
 type Segment struct {
-	Id int `json:"id,omitempty" db:"-"  `
-
-	Slug       string  `json:"slug" db:"slug" validate:"required" csv:"slug"`
-	Expire     *Expire `json:"expire,omitempty" db:"-" csv:"-"`
-	RandomSeed int     `json:"random,omitempty" db:"-" csv:"-"`
-
-	//"2015-07-05T22:16:18Z
+	Id   int    `json:"id,omitempty" db:"-"   csv:"-"`
+	Slug string `json:"slug" db:"slug" validate:"required" csv:"slug"`
 }
 
-type Expire struct {
-	Days    int `json:"days,omitempty" db:"-"`
-	Hours   int `json:"hours,omitempty" db:"-"`
-	Minutes int `json:"minutes,omitempty" db:"-"`
-}
 type User struct {
 	Id int `json:"id,omitempty" db:"id"`
 	//Username string `json:"username" db:"username"`
