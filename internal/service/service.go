@@ -6,6 +6,24 @@ import (
 	"context"
 )
 
+//go:generate mockgen -source=service.go -destination=mocks/mock.go
+
+type User interface {
+	CreateUser(ctx context.Context, username string) error
+	DeleteUser(ctx context.Context, userId int) error
+	AddSegmentsToUser(ctx context.Context, userId int, segments ...*Segment_AddSegmentsToUser) error
+	GetUsersSegments(ctx context.Context, userId int) (*[]rep.Segment, error)
+	DeleteSegmentsFromUser(ctx context.Context, userId int, segments ...*Segment_DeleteSegmentsFromUser) (err error)
+}
+
+type Segment interface {
+	CreateSegment(ctx context.Context, segment Segment_CreateSegment) error
+	CreateSegmentPercent(ctx context.Context, segment Segment_CreateSegment) (*[]User_CreateSegment, error)
+	DeleteSegment(ctx context.Context, segment Segment_DeleteSegment) error
+}
+type History interface {
+	GetHistory(ctx context.Context, userId, year, month int) (*[]rep.HistoryRow, error)
+}
 type Service interface {
 	User
 	Segment
@@ -21,21 +39,4 @@ func New(r rep.Repository, ttl ttl.TTL) Service {
 		r,
 		ttl,
 	}
-}
-
-type User interface {
-	CreateUser(ctx context.Context, username string) error
-	DeleteUser(ctx context.Context, userId int) error
-	AddSegmentsToUser(ctx context.Context, userId int, segments ...*Segment_AddSegmentsToUser) error
-	GetUsersSegments(ctx context.Context, userId int) ([]rep.Segment, error)
-	DeleteSegmentsFromUser(ctx context.Context, userId int, segments ...*Segment_DeleteSegmentsFromUser) (err error)
-}
-
-type Segment interface {
-	CreateSegment(ctx context.Context, segment Segment_CreateSegment) error
-	CreateSegmentPercent(ctx context.Context, segment Segment_CreateSegment) (*[]User_CreateSegmentPercent, error)
-	DeleteSegment(ctx context.Context, segment Segment_DeleteSegment) error
-}
-type History interface {
-	GetHistory(ctx context.Context, userId, year, month int) (*[]rep.HistoryRow, error)
 }

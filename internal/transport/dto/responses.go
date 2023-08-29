@@ -6,7 +6,7 @@ import (
 
 type ResponseGetUsersSegments struct {
 	User
-	Segments []db.Segment `json:"segments"`
+	Segments *[]db.Segment `json:"segments"`
 }
 
 type ResponseGetHistory struct {

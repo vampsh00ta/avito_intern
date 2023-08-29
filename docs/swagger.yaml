@@ -101,7 +101,6 @@ paths:
       - description: Id пользователя
         in: query
         name: user_id
-        required: true
         type: integer
       - description: Месяц
         in: query

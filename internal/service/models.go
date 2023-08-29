@@ -6,7 +6,7 @@ type Segment_CreateSegment struct {
 	db.Segment
 	UserPercent int `json:"user_percent,omitempty"`
 }
-type User_CreateSegmentPercent struct {
+type User_CreateSegment struct {
 	db.User
 }
 type Segment_DeleteSegment struct {

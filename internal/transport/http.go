@@ -19,18 +19,6 @@ import (
 var validate = validator.New()
 var decoder = schema.NewDecoder()
 
-type HttpServer struct {
-	service service.Service
-	log     *zap.SugaredLogger
-}
-
-func NewHttpServer(service service.Service, logger *zap.SugaredLogger) Transport {
-	return HttpServer{
-		service: service,
-		log:     logger,
-	}
-}
-
 // PingExample godoc
 //
 //	@Summary		CreateUser
@@ -113,16 +101,16 @@ func (h HttpServer) DeleteUser(w http.ResponseWriter, r *http.Request) {
 //	@Description	Создает сегмент
 //	@Tags			Segment
 //	@Accept			json
-//	@Param  		slug   body      dto.RequestCreateSegment  true  "Слэт"
-//	@Produce		json
-//	@Success		200 {object}  response.Response
-//	@Failure		400	{string}	string	"ok"
-//	@Failure		404	{string}	string	"ok"
-//	@Failure		500	{string}	string	"ok"
-//	@Router			/segment/new [post]
+//
+// @Param  		slug   body      dto.RequestCreateSegment  true  "Слэт"
+// @Produce		json
+// @Success		200 {object}  response.Response
+// @Failure		400	{string}	string	"ok"
+// @Failure		404	{string}	string	"ok"
+// @Failure		500	{string}	string	"ok"
+// @Router			/segment/new [post]
 func (h HttpServer) AddSegment(w http.ResponseWriter, r *http.Request) {
 	var req dto.RequestCreateSegment
-	auto := r.URL.Query().Get("auto")
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		fmt.Println(req)
 		http.Error(w, "validation error", http.StatusBadRequest)
@@ -132,10 +120,10 @@ func (h HttpServer) AddSegment(w http.ResponseWriter, r *http.Request) {
 		return
 
 	}
-	var res *[]service.User_CreateSegmentPercent
+	var res *[]service.User_CreateSegment
 	var err error
 
-	if auto != "true" {
+	if req.UserPercent == 0 {
 		err = h.service.CreateSegment(r.Context(), req.Segment_CreateSegment)
 	} else {
 		res, err = h.service.CreateSegmentPercent(r.Context(), req.Segment_CreateSegment)
@@ -296,7 +284,7 @@ func (h HttpServer) DeleteSegmentsFromUser(w http.ResponseWriter, r *http.Reques
 //	@Description	Возвращает историю добавления/удаления сегментов пользователю
 //	@Tags			History
 //	@Accept			json
-//	@Param  		user_id query int  true "Id пользователя"
+//	@Param  		user_id query int  false "Id пользователя"
 //	@Param  		month  query  string  true "Месяц"
 //	@Param  		year  query  string true "Год"
 //	@Produce		json
@@ -325,6 +313,8 @@ func (h HttpServer) GetHistory(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "text/csv")
+	w.Header().Set("Transfer-Encoding", "chunked")
+
 	gocsv.Marshal(history, w)
 
 	return

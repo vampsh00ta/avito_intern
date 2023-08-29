@@ -18,7 +18,7 @@ type UserRepository interface {
 	AddSegmentsToUser(ctx context.Context, userId int, segments ...*Segment) error
 	AddSlugIdToUsers(ctx context.Context, segment Segment, ids ...int) error
 
-	GetUsersSegments(ctx context.Context, userId int) ([]Segment, error)
+	GetUsersSegments(ctx context.Context, userId int) (*[]Segment, error)
 	DeleteSegmentsFromUser(ctx context.Context, userId int, segment ...*Segment) error
 	GetUserIds(ctx context.Context) ([]int, error)
 }
@@ -29,7 +29,8 @@ type SegmentRepository interface {
 type History interface {
 	AddToHistoryUserSlugs(ctx context.Context, tx pgx.Tx, userId int, operationType bool, segments ...*Segment) error
 	AddToHistorySlugUsers(ctx context.Context, tx pgx.Tx, segment Segment, operationType bool, ids ...int) error
-	GetHistory(ctx context.Context, userId int, year, month int) (*[]HistoryRow, error)
+	GetHistoryById(ctx context.Context, userId int, year, month int) (*[]HistoryRow, error)
+	GetHistoryAll(ctx context.Context, year, month int) (*[]HistoryRow, error)
 }
 type Db struct {
 	client postgresql.Client

@@ -1,0 +1,49 @@
+version: "3"
+services:
+  app:
+    build:
+      context: .
+    image: goapp
+
+    env_file:
+      - .env
+    ports:
+      - 8000:8000
+    restart: always
+    links:
+      - db
+  db:
+    image: postgres:14.6
+    restart: always
+    hostname: db
+    environment:
+      POSTGRES_DB: "avito"
+      POSTGRES_USER: "avito"
+      POSTGRES_PASSWORD: "avito"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgres
+    healthcheck:
+      test: pg_isready -U avito -d avito
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  migrate:
+    image: migrate/migrate
+
+    volumes:
+      - .:/migrations
+    command: [ "-path", "migrations", "-database",  "postgres://avito:avito@avito:5432/avito?sslmode=disable&connect_timeout=10", "up" ]
+    links:
+      - app
+    depends_on:
+      - app
+
+networks:
+  db:
+
+volumes:
+  postgres_data:
+

@@ -34,8 +34,7 @@ const docTemplate = `{
                         "type": "integer",
                         "description": "Id пользователя",
                         "name": "user_id",
-                        "in": "query",
-                        "required": true
+                        "in": "query"
                     },
                     {
                         "type": "string",

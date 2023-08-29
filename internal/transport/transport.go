@@ -1,6 +1,8 @@
 package transport
 
 import (
+	"avito/internal/service"
+	"go.uber.org/zap"
 	"net/http"
 )
 
@@ -13,4 +15,15 @@ type Transport interface {
 	GetUsersSegments(w http.ResponseWriter, r *http.Request)
 	DeleteSegmentsFromUser(w http.ResponseWriter, r *http.Request)
 	GetHistory(w http.ResponseWriter, r *http.Request)
+}
+type HttpServer struct {
+	service service.Service
+	log     *zap.SugaredLogger
+}
+
+func NewHttpServer(service service.Service, logger *zap.SugaredLogger) Transport {
+	return HttpServer{
+		service: service,
+		log:     logger,
+	}
 }
