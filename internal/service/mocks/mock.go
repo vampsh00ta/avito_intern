@@ -5,13 +5,221 @@
 package mock_service
 
 import (
-	repository "avito/internal/db"
+	db "avito/internal/db"
 	service "avito/internal/service"
 	context "context"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
 )
+
+// MockUser is a mock of User interface.
+type MockUser struct {
+	ctrl     *gomock.Controller
+	recorder *MockUserMockRecorder
+}
+
+// MockUserMockRecorder is the mock recorder for MockUser.
+type MockUserMockRecorder struct {
+	mock *MockUser
+}
+
+// NewMockUser creates a new mock instance.
+func NewMockUser(ctrl *gomock.Controller) *MockUser {
+	mock := &MockUser{ctrl: ctrl}
+	mock.recorder = &MockUserMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockUser) EXPECT() *MockUserMockRecorder {
+	return m.recorder
+}
+
+// AddSegmentsToUser mocks base method.
+func (m *MockUser) AddSegmentsToUser(ctx context.Context, userId int, segments ...*service.Segment_AddSegmentsToUser) error {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, userId}
+	for _, a := range segments {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "AddSegmentsToUser", varargs...)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AddSegmentsToUser indicates an expected call of AddSegmentsToUser.
+func (mr *MockUserMockRecorder) AddSegmentsToUser(ctx, userId interface{}, segments ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, userId}, segments...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddSegmentsToUser", reflect.TypeOf((*MockUser)(nil).AddSegmentsToUser), varargs...)
+}
+
+// CreateUser mocks base method.
+func (m *MockUser) CreateUser(ctx context.Context, username string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateUser", ctx, username)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateUser indicates an expected call of CreateUser.
+func (mr *MockUserMockRecorder) CreateUser(ctx, username interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUser", reflect.TypeOf((*MockUser)(nil).CreateUser), ctx, username)
+}
+
+// DeleteSegmentsFromUser mocks base method.
+func (m *MockUser) DeleteSegmentsFromUser(ctx context.Context, userId int, segments ...*service.Segment_DeleteSegmentsFromUser) error {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, userId}
+	for _, a := range segments {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DeleteSegmentsFromUser", varargs...)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteSegmentsFromUser indicates an expected call of DeleteSegmentsFromUser.
+func (mr *MockUserMockRecorder) DeleteSegmentsFromUser(ctx, userId interface{}, segments ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, userId}, segments...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSegmentsFromUser", reflect.TypeOf((*MockUser)(nil).DeleteSegmentsFromUser), varargs...)
+}
+
+// DeleteUser mocks base method.
+func (m *MockUser) DeleteUser(ctx context.Context, userId int) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteUser", ctx, userId)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteUser indicates an expected call of DeleteUser.
+func (mr *MockUserMockRecorder) DeleteUser(ctx, userId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteUser", reflect.TypeOf((*MockUser)(nil).DeleteUser), ctx, userId)
+}
+
+// GetUsersSegments mocks base method.
+func (m *MockUser) GetUsersSegments(ctx context.Context, userId int) (*[]db.Segment, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUsersSegments", ctx, userId)
+	ret0, _ := ret[0].(*[]db.Segment)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUsersSegments indicates an expected call of GetUsersSegments.
+func (mr *MockUserMockRecorder) GetUsersSegments(ctx, userId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUsersSegments", reflect.TypeOf((*MockUser)(nil).GetUsersSegments), ctx, userId)
+}
+
+// MockSegment is a mock of Segment interface.
+type MockSegment struct {
+	ctrl     *gomock.Controller
+	recorder *MockSegmentMockRecorder
+}
+
+// MockSegmentMockRecorder is the mock recorder for MockSegment.
+type MockSegmentMockRecorder struct {
+	mock *MockSegment
+}
+
+// NewMockSegment creates a new mock instance.
+func NewMockSegment(ctrl *gomock.Controller) *MockSegment {
+	mock := &MockSegment{ctrl: ctrl}
+	mock.recorder = &MockSegmentMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockSegment) EXPECT() *MockSegmentMockRecorder {
+	return m.recorder
+}
+
+// CreateSegment mocks base method.
+func (m *MockSegment) CreateSegment(ctx context.Context, segment service.Segment_CreateSegment) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateSegment", ctx, segment)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateSegment indicates an expected call of CreateSegment.
+func (mr *MockSegmentMockRecorder) CreateSegment(ctx, segment interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateSegment", reflect.TypeOf((*MockSegment)(nil).CreateSegment), ctx, segment)
+}
+
+// CreateSegmentPercent mocks base method.
+func (m *MockSegment) CreateSegmentPercent(ctx context.Context, segment service.Segment_CreateSegment) (*[]service.User_CreateSegment, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateSegmentPercent", ctx, segment)
+	ret0, _ := ret[0].(*[]service.User_CreateSegment)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateSegmentPercent indicates an expected call of CreateSegmentPercent.
+func (mr *MockSegmentMockRecorder) CreateSegmentPercent(ctx, segment interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateSegmentPercent", reflect.TypeOf((*MockSegment)(nil).CreateSegmentPercent), ctx, segment)
+}
+
+// DeleteSegment mocks base method.
+func (m *MockSegment) DeleteSegment(ctx context.Context, segment service.Segment_DeleteSegment) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteSegment", ctx, segment)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteSegment indicates an expected call of DeleteSegment.
+func (mr *MockSegmentMockRecorder) DeleteSegment(ctx, segment interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSegment", reflect.TypeOf((*MockSegment)(nil).DeleteSegment), ctx, segment)
+}
+
+// MockHistory is a mock of History interface.
+type MockHistory struct {
+	ctrl     *gomock.Controller
+	recorder *MockHistoryMockRecorder
+}
+
+// MockHistoryMockRecorder is the mock recorder for MockHistory.
+type MockHistoryMockRecorder struct {
+	mock *MockHistory
+}
+
+// NewMockHistory creates a new mock instance.
+func NewMockHistory(ctrl *gomock.Controller) *MockHistory {
+	mock := &MockHistory{ctrl: ctrl}
+	mock.recorder = &MockHistoryMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockHistory) EXPECT() *MockHistoryMockRecorder {
+	return m.recorder
+}
+
+// GetHistory mocks base method.
+func (m *MockHistory) GetHistory(ctx context.Context, userId, year, month int) (*[]db.HistoryRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetHistory", ctx, userId, year, month)
+	ret0, _ := ret[0].(*[]db.HistoryRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetHistory indicates an expected call of GetHistory.
+func (mr *MockHistoryMockRecorder) GetHistory(ctx, userId, year, month interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetHistory", reflect.TypeOf((*MockHistory)(nil).GetHistory), ctx, userId, year, month)
+}
 
 // MockService is a mock of Service interface.
 type MockService struct {
@@ -146,10 +354,10 @@ func (mr *MockServiceMockRecorder) DeleteUser(ctx, userId interface{}) *gomock.C
 }
 
 // GetHistory mocks base method.
-func (m *MockService) GetHistory(ctx context.Context, userId, year, month int) (*[]repository.HistoryRow, error) {
+func (m *MockService) GetHistory(ctx context.Context, userId, year, month int) (*[]db.HistoryRow, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetHistory", ctx, userId, year, month)
-	ret0, _ := ret[0].(*[]repository.HistoryRow)
+	ret0, _ := ret[0].(*[]db.HistoryRow)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -161,10 +369,10 @@ func (mr *MockServiceMockRecorder) GetHistory(ctx, userId, year, month interface
 }
 
 // GetUsersSegments mocks base method.
-func (m *MockService) GetUsersSegments(ctx context.Context, userId int) (*[]repository.Segment, error) {
+func (m *MockService) GetUsersSegments(ctx context.Context, userId int) (*[]db.Segment, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUsersSegments", ctx, userId)
-	ret0, _ := ret[0].(*[]repository.Segment)
+	ret0, _ := ret[0].(*[]db.Segment)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -173,212 +381,4 @@ func (m *MockService) GetUsersSegments(ctx context.Context, userId int) (*[]repo
 func (mr *MockServiceMockRecorder) GetUsersSegments(ctx, userId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUsersSegments", reflect.TypeOf((*MockService)(nil).GetUsersSegments), ctx, userId)
-}
-
-// MockUser is a mock of User interface.
-type MockUser struct {
-	ctrl     *gomock.Controller
-	recorder *MockUserMockRecorder
-}
-
-// MockUserMockRecorder is the mock recorder for MockUser.
-type MockUserMockRecorder struct {
-	mock *MockUser
-}
-
-// NewMockUser creates a new mock instance.
-func NewMockUser(ctrl *gomock.Controller) *MockUser {
-	mock := &MockUser{ctrl: ctrl}
-	mock.recorder = &MockUserMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockUser) EXPECT() *MockUserMockRecorder {
-	return m.recorder
-}
-
-// AddSegmentsToUser mocks base method.
-func (m *MockUser) AddSegmentsToUser(ctx context.Context, userId int, segments ...*service.Segment_AddSegmentsToUser) error {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, userId}
-	for _, a := range segments {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "AddSegmentsToUser", varargs...)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// AddSegmentsToUser indicates an expected call of AddSegmentsToUser.
-func (mr *MockUserMockRecorder) AddSegmentsToUser(ctx, userId interface{}, segments ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, userId}, segments...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddSegmentsToUser", reflect.TypeOf((*MockUser)(nil).AddSegmentsToUser), varargs...)
-}
-
-// CreateUser mocks base method.
-func (m *MockUser) CreateUser(ctx context.Context, username string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateUser", ctx, username)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// CreateUser indicates an expected call of CreateUser.
-func (mr *MockUserMockRecorder) CreateUser(ctx, username interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUser", reflect.TypeOf((*MockUser)(nil).CreateUser), ctx, username)
-}
-
-// DeleteSegmentsFromUser mocks base method.
-func (m *MockUser) DeleteSegmentsFromUser(ctx context.Context, userId int, segments ...*service.Segment_DeleteSegmentsFromUser) error {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, userId}
-	for _, a := range segments {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "DeleteSegmentsFromUser", varargs...)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// DeleteSegmentsFromUser indicates an expected call of DeleteSegmentsFromUser.
-func (mr *MockUserMockRecorder) DeleteSegmentsFromUser(ctx, userId interface{}, segments ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, userId}, segments...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSegmentsFromUser", reflect.TypeOf((*MockUser)(nil).DeleteSegmentsFromUser), varargs...)
-}
-
-// DeleteUser mocks base method.
-func (m *MockUser) DeleteUser(ctx context.Context, userId int) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteUser", ctx, userId)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// DeleteUser indicates an expected call of DeleteUser.
-func (mr *MockUserMockRecorder) DeleteUser(ctx, userId interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteUser", reflect.TypeOf((*MockUser)(nil).DeleteUser), ctx, userId)
-}
-
-// GetUsersSegments mocks base method.
-func (m *MockUser) GetUsersSegments(ctx context.Context, userId int) (*[]repository.Segment, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetUsersSegments", ctx, userId)
-	ret0, _ := ret[0].(*[]repository.Segment)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetUsersSegments indicates an expected call of GetUsersSegments.
-func (mr *MockUserMockRecorder) GetUsersSegments(ctx, userId interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUsersSegments", reflect.TypeOf((*MockUser)(nil).GetUsersSegments), ctx, userId)
-}
-
-// MockSegment is a mock of Segment interface.
-type MockSegment struct {
-	ctrl     *gomock.Controller
-	recorder *MockSegmentMockRecorder
-}
-
-// MockSegmentMockRecorder is the mock recorder for MockSegment.
-type MockSegmentMockRecorder struct {
-	mock *MockSegment
-}
-
-// NewMockSegment creates a new mock instance.
-func NewMockSegment(ctrl *gomock.Controller) *MockSegment {
-	mock := &MockSegment{ctrl: ctrl}
-	mock.recorder = &MockSegmentMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockSegment) EXPECT() *MockSegmentMockRecorder {
-	return m.recorder
-}
-
-// CreateSegment mocks base method.
-func (m *MockSegment) CreateSegment(ctx context.Context, segment service.Segment_CreateSegment) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateSegment", ctx, segment)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// CreateSegment indicates an expected call of CreateSegment.
-func (mr *MockSegmentMockRecorder) CreateSegment(ctx, segment interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateSegment", reflect.TypeOf((*MockSegment)(nil).CreateSegment), ctx, segment)
-}
-
-// CreateSegmentPercent mocks base method.
-func (m *MockSegment) CreateSegmentPercent(ctx context.Context, segment service.Segment_CreateSegment) (*[]service.User_CreateSegment, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateSegmentPercent", ctx, segment)
-	ret0, _ := ret[0].(*[]service.User_CreateSegment)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// CreateSegmentPercent indicates an expected call of CreateSegmentPercent.
-func (mr *MockSegmentMockRecorder) CreateSegmentPercent(ctx, segment interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateSegmentPercent", reflect.TypeOf((*MockSegment)(nil).CreateSegmentPercent), ctx, segment)
-}
-
-// DeleteSegment mocks base method.
-func (m *MockSegment) DeleteSegment(ctx context.Context, segment service.Segment_DeleteSegment) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteSegment", ctx, segment)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// DeleteSegment indicates an expected call of DeleteSegment.
-func (mr *MockSegmentMockRecorder) DeleteSegment(ctx, segment interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSegment", reflect.TypeOf((*MockSegment)(nil).DeleteSegment), ctx, segment)
-}
-
-// MockHistory is a mock of History interface.
-type MockHistory struct {
-	ctrl     *gomock.Controller
-	recorder *MockHistoryMockRecorder
-}
-
-// MockHistoryMockRecorder is the mock recorder for MockHistory.
-type MockHistoryMockRecorder struct {
-	mock *MockHistory
-}
-
-// NewMockHistory creates a new mock instance.
-func NewMockHistory(ctrl *gomock.Controller) *MockHistory {
-	mock := &MockHistory{ctrl: ctrl}
-	mock.recorder = &MockHistoryMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockHistory) EXPECT() *MockHistoryMockRecorder {
-	return m.recorder
-}
-
-// GetHistory mocks base method.
-func (m *MockHistory) GetHistory(ctx context.Context, userId, year, month int) (*[]repository.HistoryRow, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetHistory", ctx, userId, year, month)
-	ret0, _ := ret[0].(*[]repository.HistoryRow)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetHistory indicates an expected call of GetHistory.
-func (mr *MockHistoryMockRecorder) GetHistory(ctx, userId, year, month interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetHistory", reflect.TypeOf((*MockHistory)(nil).GetHistory), ctx, userId, year, month)
 }

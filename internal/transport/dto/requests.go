@@ -9,10 +9,10 @@ type User struct {
 }
 
 type RequestCreateUser struct {
-	Username string `json:"username" validate:"required"`
+	Username string `json:"username" validate:"required,gt=0,omitempty"`
 }
 type RequestDeleteUser struct {
-	User
+	User `validate:"required"`
 }
 type RequestCreateSegment struct {
 	service.Segment_CreateSegment `validate:"required"`

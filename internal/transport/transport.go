@@ -6,8 +6,10 @@ import (
 	"net/http"
 )
 
+//go:generate mockgen -source=transport.go -destination=mocks/mock.go
+
 type Transport interface {
-	AddSegment(w http.ResponseWriter, r *http.Request)
+	CreateSegment(w http.ResponseWriter, r *http.Request)
 	DeleteSegment(w http.ResponseWriter, r *http.Request)
 	CreateUser(w http.ResponseWriter, r *http.Request)
 	DeleteUser(w http.ResponseWriter, r *http.Request)
