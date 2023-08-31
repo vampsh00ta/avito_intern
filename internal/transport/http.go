@@ -17,19 +17,17 @@ import (
 var validate = validator.New()
 var decoder = schema.NewDecoder()
 
-// PingExample godoc
-//
-//	@Summary		CreateUser
-//	@Description	Создает пользователя.Если такой пользователь уже существует,то выведете соответствующую ошибку.
-//	@Tags			User
-//	@Accept			json
-//	@Param  		username   body      dto.RequestCreateUser  true  "username"
-//	@Produce		json
-//	@Success		200 {object}  httpresponse.Response
-//	@Failure		400	{object}	httpresponse.Response
-//	@Failure		404	{object}	httpresponse.Response
-//	@Failure		500	{object}	httpresponse.Response
-//	@Router			/user/new [post]
+// @Summary		CreateUser
+// @Description	Создает пользователя.Если такой пользователь уже существует,то выведете соответствующую ошибку.
+// @Tags			User
+// @Accept			json
+// @Param  		username   body      dto.RequestCreateUser  true  "username"
+// @Produce		json
+// @Success		200 {object}  httpresponse.Response
+// @Failure		400	{object}	httpresponse.Response
+// @Failure		404	{object}	httpresponse.Response
+// @Failure		500	{object}	httpresponse.Response
+// @Router			/user/new [post]
 func (h HttpServer) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var req dto.RequestCreateUser
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -61,19 +59,17 @@ func (h HttpServer) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// PingExample godoc
-//
-//	@Summary		DeleteUser
-//	@Description	Удаляет пользователя
-//	@Tags			User
-//	@Accept			json
-//	@Param  		username   body      dto.RequestDeleteUser  true  "username"
-//	@Produce		json
-//	@Success		200 {object}  httpresponse.Response
-//	@Failure		400	{object}	httpresponse.Response
-//	@Failure		404	{object}	httpresponse.Response
-//	@Failure		500	{object}	httpresponse.Response
-//	@Router			/user [delete]
+// @Summary		DeleteUser
+// @Description	Удаляет пользователя
+// @Tags			User
+// @Accept			json
+// @Param  		username   body      dto.RequestDeleteUser  true  "username"
+// @Produce		json
+// @Success		200 {object}  httpresponse.Response
+// @Failure		400	{object}	httpresponse.Response
+// @Failure		404	{object}	httpresponse.Response
+// @Failure		500	{object}	httpresponse.Response
+// @Router			/user [delete]
 func (h HttpServer) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	var req dto.RequestDeleteUser
 
@@ -105,8 +101,6 @@ func (h HttpServer) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-// PingExample godoc
-//
 //	@Summary		CreateSegment
 //	@Description	Создает сегмент.Если указан user_percent,то добавит созданный сегмент указанному проценту пользователей(округление идет в большую сторону) и добавит запись в history.Если такой сегмент уже существует,то выведет соответствующую ошибку.
 //	@Tags			Segment
@@ -164,19 +158,17 @@ func (h HttpServer) CreateSegment(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// PingExample godoc
-//
-//	@Summary		DeleteSegment
-//	@Description	Удаляет сегмент
-//	@Tags			Segment
-//	@Accept			json
-//	@Param  		slug   body      dto.RequestDeleteSegment  true  "slug"
-//	@Produce		json
-//	@Success		200 {object}  httpresponse.Response
-//	@Failure		400	{object}	httpresponse.Response
-//	@Failure		404	{object}	httpresponse.Response
-//	@Failure		500	{object}	httpresponse.Response
-//	@Router			/segment [delete]
+// @Summary		DeleteSegment
+// @Description	Удаляет сегмент
+// @Tags			Segment
+// @Accept			json
+// @Param  		slug   body      dto.RequestDeleteSegment  true  "slug"
+// @Produce		json
+// @Success		200 {object}  httpresponse.Response
+// @Failure		400	{object}	httpresponse.Response
+// @Failure		404	{object}	httpresponse.Response
+// @Failure		500	{object}	httpresponse.Response
+// @Router			/segment [delete]
 func (h HttpServer) DeleteSegment(w http.ResponseWriter, r *http.Request) {
 	var req dto.RequestDeleteSegment
 
@@ -206,19 +198,17 @@ func (h HttpServer) DeleteSegment(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-// PingExample godoc
-//
-//	@Summary		GetUsersSegments
-//	@Description	Возвращает сегметы пользователя
-//	@Tags			User
-//	@Accept			json
-//	@Param  		id   path  int      true  "id"
-//	@Produce		json
-//	@Success		200 {object}  httpresponse.Response
-//	@Failure		400	{object}	httpresponse.Response
-//	@Failure		404	{object}	httpresponse.Response
-//	@Failure		500	{object}	httpresponse.Response
-//	@Router			/user/segments/{id} [get]
+// @Summary		GetUsersSegments
+// @Description	Возвращает сегметы пользователя
+// @Tags			User
+// @Accept			json
+// @Param  		id   path  int      true  "id"
+// @Produce		json
+// @Success		200 {object}  httpresponse.Response
+// @Failure		400	{object}	httpresponse.Response
+// @Failure		404	{object}	httpresponse.Response
+// @Failure		500	{object}	httpresponse.Response
+// @Router			/user/segments/{id} [get]
 func (h HttpServer) GetUsersSegments(w http.ResponseWriter, r *http.Request) {
 
 	idStr := mux.Vars(r)["id"]
@@ -244,19 +234,17 @@ func (h HttpServer) GetUsersSegments(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// PingExample godoc
-//
-//	@Summary		AddSegmentsToUser
-//	@Description	Добавляет сегменты пользователю.Если в сегментах указаны expire,то добавляет заданным сегментам TTL.Также добавляет запись добавления в history
-//	@Tags			User
-//	@Accept			json
-//	@Param  		id    segments  body  dto.RequestAddSegmentsToUser    true  "id"
-//	@Produce		json
-//	@Success		200 {object}  httpresponse.Response
-//	@Failure		400	{object}	httpresponse.Response
-//	@Failure		404	{object}	httpresponse.Response
-//	@Failure		500	{object}	httpresponse.Response
-//	@Router			/user/segments/add [post]
+// @Summary		AddSegmentsToUser
+// @Description	Добавляет сегменты пользователю.Если в сегментах указаны expire,то добавляет заданным сегментам TTL.Также добавляет запись добавления в history
+// @Tags			User
+// @Accept			json
+// @Param  		id    segments  body  dto.RequestAddSegmentsToUser    true  "id"
+// @Produce		json
+// @Success		200 {object}  httpresponse.Response
+// @Failure		400	{object}	httpresponse.Response
+// @Failure		404	{object}	httpresponse.Response
+// @Failure		500	{object}	httpresponse.Response
+// @Router			/user/segments/add [post]
 func (h HttpServer) AddSegmentsToUser(w http.ResponseWriter, r *http.Request) {
 	var req dto.RequestAddSegmentsToUser
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -284,19 +272,17 @@ func (h HttpServer) AddSegmentsToUser(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-// PingExample godoc
-//
-//	@Summary		DeleteSegmentsFromUser
-//	@Description	Удаляет сегменты пользователя.Если у сегмента был TTL, то удаляет его из кэша.Также добавляет запись удаления в history
-//	@Tags			User
-//	@Accept			json
-//	@Param  		id    segments  body  dto.RequestDeleteSegmentsFromUser    true  "id"
-//	@Produce		json
-//	@Success		200 {object}  httpresponse.Response
-//	@Failure		400	{object}	httpresponse.Response
-//	@Failure		404	{object}	httpresponse.Response
-//	@Failure		500	{object}	httpresponse.Response
-//	@Router			/user/segments [delete]
+// @Summary		DeleteSegmentsFromUser
+// @Description	Удаляет сегменты пользователя.Если у сегмента был TTL, то удаляет его из кэша.Также добавляет запись удаления в history
+// @Tags			User
+// @Accept			json
+// @Param  		id    segments  body  dto.RequestDeleteSegmentsFromUser    true  "id"
+// @Produce		json
+// @Success		200 {object}  httpresponse.Response
+// @Failure		400	{object}	httpresponse.Response
+// @Failure		404	{object}	httpresponse.Response
+// @Failure		500	{object}	httpresponse.Response
+// @Router			/user/segments [delete]
 func (h HttpServer) DeleteSegmentsFromUser(w http.ResponseWriter, r *http.Request) {
 	var req dto.RequestDeleteSegmentsFromUser
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -325,23 +311,20 @@ func (h HttpServer) DeleteSegmentsFromUser(w http.ResponseWriter, r *http.Reques
 	return
 }
 
-// PingExample godoc
+// @Summary		GetHistory
+// @Description	Возвращает историю добавления/удаления сегментов  в виде csv файла.Если указан user_id , то возвращает историю конкретного пользователя, иначе - все историю заданного периода
+// @Tags			History
+// @Accept			json
+// @Param  		user_id query int  false "user_id"
+// @Param  		month  query  string  true "Месяц"
+// @Param  		year  query  string true "Год"
+// @Produce		json
 //
-//	@Summary		GetHistory
-//	@Description	Возвращает историю добавления/удаления сегментов  в виде csv файла.Если указан user_id , то возвращает историю конкретного пользователя, иначе - все историю заданного периода
-//	@Tags			History
-//	@Accept			json
-//	@Param  		user_id query int  false "user_id"
-//	@Param  		month  query  string  true "Месяц"
-//	@Param  		year  query  string true "Год"
-//	@Produce		json
-//
-//
-//	@Success		200 {object}	httpresponse.Response
-//	@Failure		400	{object}	httpresponse.Response
-//	@Failure		404	{object}	httpresponse.Response
-//	@Failure		500	{object}	httpresponse.Response
-//	@Router			/history [get]
+// @Success		200 {object}	httpresponse.Response
+// @Failure		400	{object}	httpresponse.Response
+// @Failure		404	{object}	httpresponse.Response
+// @Failure		500	{object}	httpresponse.Response
+// @Router			/history [get]
 func (h HttpServer) GetHistory(w http.ResponseWriter, r *http.Request) {
 	var req dto.RequestGetHistory
 	if err := decoder.Decode(&req, r.URL.Query()); err != nil {
