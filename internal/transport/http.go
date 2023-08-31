@@ -18,7 +18,7 @@ var validate = validator.New()
 var decoder = schema.NewDecoder()
 
 // @Summary		CreateUser
-// @Description	Создает пользователя.Если такой пользователь уже существует,то выведете соответствующую ошибку.
+// @Description	Создает пользователя.Принимает имя пользователя.Если такой пользователь уже существует,то выведете соответствующую ошибку.
 // @Tags			User
 // @Accept			json
 // @Param  		username   body      dto.RequestCreateUser  true  "username"
@@ -60,10 +60,10 @@ func (h HttpServer) CreateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 // @Summary		DeleteUser
-// @Description	Удаляет пользователя
+// @Description	Удаляет пользователя.Принимает Id пользователя
 // @Tags			User
 // @Accept			json
-// @Param  		username   body      dto.RequestDeleteUser  true  "username"
+// @Param  		id   body      dto.RequestDeleteUser  true  "id"
 // @Produce		json
 // @Success		200 {object}  httpresponse.Response
 // @Failure		400	{object}	httpresponse.Response
@@ -102,7 +102,7 @@ func (h HttpServer) DeleteUser(w http.ResponseWriter, r *http.Request) {
 }
 
 //	@Summary		CreateSegment
-//	@Description	Создает сегмент.Если указан user_percent,то добавит созданный сегмент указанному проценту пользователей(округление идет в большую сторону) и добавит запись в history.Если такой сегмент уже существует,то выведет соответствующую ошибку.
+//	@Description	Создает сегмент.Принимает slug сегмента и процент пользоватей,которым он присвоится.Если указан user_percent,то добавит созданный сегмент указанному проценту пользователей(округление идет в большую сторону) , добавит запись в history и вернет id пользователей,котором добавили созданный сегмент.Если такой сегмент уже существует,то выведет соответствующую ошибку.
 //	@Tags			Segment
 //	@Accept			json
 //
@@ -164,7 +164,7 @@ func (h HttpServer) CreateSegment(w http.ResponseWriter, r *http.Request) {
 }
 
 // @Summary		DeleteSegment
-// @Description	Удаляет сегмент
+// @Description	Удаляет сегмент.Принимает slug сегмента
 // @Tags			Segment
 // @Accept			json
 // @Param  		slug   body      dto.RequestDeleteSegment  true  "slug"
@@ -204,7 +204,7 @@ func (h HttpServer) DeleteSegment(w http.ResponseWriter, r *http.Request) {
 }
 
 // @Summary		GetUsersSegments
-// @Description	Возвращает сегметы пользователя
+// @Description	Возвращает сегметы пользовател.Принимает id пользователя
 // @Tags			User
 // @Accept			json
 // @Param  		id   path  int      true  "id"
@@ -240,7 +240,7 @@ func (h HttpServer) GetUsersSegments(w http.ResponseWriter, r *http.Request) {
 }
 
 // @Summary		AddSegmentsToUser
-// @Description	Добавляет сегменты пользователю.Если в сегментах указаны expire,то добавляет заданным сегментам TTL.Также добавляет запись добавления в history
+// @Description	Добавляет сегменты пользователю.Принимает id пользователя и сегменты с полями slug и expire.Если в сегментах указаны expire,то добавляет заданным сегментам TTL.Также добавляет запись добавления в history
 // @Tags			User
 // @Accept			json
 // @Param  		id    segments  body  dto.RequestAddSegmentsToUser    true  "id"
@@ -278,7 +278,7 @@ func (h HttpServer) AddSegmentsToUser(w http.ResponseWriter, r *http.Request) {
 }
 
 // @Summary		DeleteSegmentsFromUser
-// @Description	Удаляет сегменты пользователя.Если у сегмента был TTL, то удаляет его из кэша.Также добавляет запись удаления в history
+// @Description	Удаляет сегменты пользователя.Принимает slug сегмента.Если у сегмента был TTL, то удаляет его из кэша.Также добавляет запись удаления в history
 // @Tags			User
 // @Accept			json
 // @Param  		id    segments  body  dto.RequestDeleteSegmentsFromUser    true  "id"
@@ -317,7 +317,7 @@ func (h HttpServer) DeleteSegmentsFromUser(w http.ResponseWriter, r *http.Reques
 }
 
 // @Summary		GetHistory
-// @Description	Возвращает историю добавления/удаления сегментов  в виде csv файла.Если указан user_id , то возвращает историю конкретного пользователя, иначе - все историю заданного периода
+// @Description	Возвращает историю добавления/удаления сегментов  в виде csv файла.Принимает id пользователя и период времени .Если указан user_id , то возвращает историю конкретного пользователя, иначе - все историю заданного периода
 // @Tags			History
 // @Accept			json
 // @Param  		user_id query int  false "user_id"

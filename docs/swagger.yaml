@@ -16,6 +16,7 @@ definitions:
       slug:
         type: string
       user_percent:
+        minimum: 0
         type: integer
     required:
     - slug
@@ -64,10 +65,13 @@ definitions:
   service.Expire:
     properties:
       days:
+        minimum: 0
         type: integer
       hours:
+        minimum: 0
         type: integer
       minutes:
+        minimum: 0
         type: integer
     type: object
   service.Segment_AddSegmentsToUser:
@@ -93,9 +97,9 @@ paths:
     get:
       consumes:
       - application/json
-      description: Возвращает историю добавления/удаления сегментов  в виде csv файла.Если
-        указан user_id , то возвращает историю конкретного пользователя, иначе - все
-        историю заданного периода
+      description: Возвращает историю добавления/удаления сегментов  в виде csv файла.Принимает
+        id пользователя и период времени .Если указан user_id , то возвращает историю
+        конкретного пользователя, иначе - все историю заданного периода
       parameters:
       - description: user_id
         in: query
@@ -137,7 +141,7 @@ paths:
     delete:
       consumes:
       - application/json
-      description: Удаляет сегмент
+      description: Удаляет сегмент.Принимает slug сегмента
       parameters:
       - description: slug
         in: body
@@ -171,10 +175,11 @@ paths:
     post:
       consumes:
       - application/json
-      description: Создает сегмент.Если указан user_percent,то добавит созданный сегмент
-        указанному проценту пользователей(округление идет в большую сторону) и добавит
-        запись в history.Если такой сегмент уже существует,то выведет соответствующую
-        ошибку.
+      description: Создает сегмент.Принимает slug сегмента и процент пользоватей,которым
+        он присвоится.Если указан user_percent,то добавит созданный сегмент указанному
+        проценту пользователей(округление идет в большую сторону) , добавит запись
+        в history и вернет id пользователей,котором добавили созданный сегмент.Если
+        такой сегмент уже существует,то выведет соответствующую ошибку.
       parameters:
       - description: slug
         in: body
@@ -208,11 +213,11 @@ paths:
     delete:
       consumes:
       - application/json
-      description: Удаляет пользователя
+      description: Удаляет пользователя.Принимает Id пользователя
       parameters:
-      - description: username
+      - description: id
         in: body
-        name: username
+        name: id
         required: true
         schema:
           $ref: '#/definitions/dto.RequestDeleteUser'
@@ -242,8 +247,8 @@ paths:
     post:
       consumes:
       - application/json
-      description: Создает пользователя.Если такой пользователь уже существует,то
-        выведете соответствующую ошибку.
+      description: Создает пользователя.Принимает имя пользователя.Если такой пользователь
+        уже существует,то выведете соответствующую ошибку.
       parameters:
       - description: username
         in: body
@@ -277,8 +282,8 @@ paths:
     delete:
       consumes:
       - application/json
-      description: Удаляет сегменты пользователя.Если у сегмента был TTL, то удаляет
-        его из кэша.Также добавляет запись удаления в history
+      description: Удаляет сегменты пользователя.Принимает slug сегмента.Если у сегмента
+        был TTL, то удаляет его из кэша.Также добавляет запись удаления в history
       parameters:
       - description: id
         in: body
@@ -312,7 +317,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: Возвращает сегметы пользователя
+      description: Возвращает сегметы пользовател.Принимает id пользователя
       parameters:
       - description: id
         in: path
@@ -345,8 +350,9 @@ paths:
     post:
       consumes:
       - application/json
-      description: Добавляет сегменты пользователю.Если в сегментах указаны expire,то
-        добавляет заданным сегментам TTL.Также добавляет запись добавления в history
+      description: Добавляет сегменты пользователю.Принимает id пользователя и сегменты
+        с полями slug и expire.Если в сегментах указаны expire,то добавляет заданным
+        сегментам TTL.Также добавляет запись добавления в history
       parameters:
       - description: id
         in: body

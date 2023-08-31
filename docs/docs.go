@@ -18,7 +18,7 @@ const docTemplate = `{
     "paths": {
         "/history": {
             "get": {
-                "description": "Возвращает историю добавления/удаления сегментов  в виде csv файла.Если указан user_id , то возвращает историю конкретного пользователя, иначе - все историю заданного периода",
+                "description": "Возвращает историю добавления/удаления сегментов  в виде csv файла.Принимает id пользователя и период времени .Если указан user_id , то возвращает историю конкретного пользователя, иначе - все историю заданного периода",
                 "consumes": [
                     "application/json"
                 ],
@@ -81,7 +81,7 @@ const docTemplate = `{
         },
         "/segment": {
             "delete": {
-                "description": "Удаляет сегмент",
+                "description": "Удаляет сегмент.Принимает slug сегмента",
                 "consumes": [
                     "application/json"
                 ],
@@ -133,7 +133,7 @@ const docTemplate = `{
         },
         "/segment/new": {
             "post": {
-                "description": "Создает сегмент.Если указан user_percent,то добавит созданный сегмент указанному проценту пользователей(округление идет в большую сторону) и добавит запись в history.Если такой сегмент уже существует,то выведет соответствующую ошибку.",
+                "description": "Создает сегмент.Принимает slug сегмента и процент пользоватей,которым он присвоится.Если указан user_percent,то добавит созданный сегмент указанному проценту пользователей(округление идет в большую сторону) , добавит запись в history и вернет id пользователей,котором добавили созданный сегмент.Если такой сегмент уже существует,то выведет соответствующую ошибку.",
                 "consumes": [
                     "application/json"
                 ],
@@ -185,7 +185,7 @@ const docTemplate = `{
         },
         "/user": {
             "delete": {
-                "description": "Удаляет пользователя",
+                "description": "Удаляет пользователя.Принимает Id пользователя",
                 "consumes": [
                     "application/json"
                 ],
@@ -198,8 +198,8 @@ const docTemplate = `{
                 "summary": "DeleteUser",
                 "parameters": [
                     {
-                        "description": "username",
-                        "name": "username",
+                        "description": "id",
+                        "name": "id",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -237,7 +237,7 @@ const docTemplate = `{
         },
         "/user/new": {
             "post": {
-                "description": "Создает пользователя.Если такой пользователь уже существует,то выведете соответствующую ошибку.",
+                "description": "Создает пользователя.Принимает имя пользователя.Если такой пользователь уже существует,то выведете соответствующую ошибку.",
                 "consumes": [
                     "application/json"
                 ],
@@ -289,7 +289,7 @@ const docTemplate = `{
         },
         "/user/segments": {
             "delete": {
-                "description": "Удаляет сегменты пользователя.Если у сегмента был TTL, то удаляет его из кэша.Также добавляет запись удаления в history",
+                "description": "Удаляет сегменты пользователя.Принимает slug сегмента.Если у сегмента был TTL, то удаляет его из кэша.Также добавляет запись удаления в history",
                 "consumes": [
                     "application/json"
                 ],
@@ -341,7 +341,7 @@ const docTemplate = `{
         },
         "/user/segments/add": {
             "post": {
-                "description": "Добавляет сегменты пользователю.Если в сегментах указаны expire,то добавляет заданным сегментам TTL.Также добавляет запись добавления в history",
+                "description": "Добавляет сегменты пользователю.Принимает id пользователя и сегменты с полями slug и expire.Если в сегментах указаны expire,то добавляет заданным сегментам TTL.Также добавляет запись добавления в history",
                 "consumes": [
                     "application/json"
                 ],
@@ -393,7 +393,7 @@ const docTemplate = `{
         },
         "/user/segments/{id}": {
             "get": {
-                "description": "Возвращает сегметы пользователя",
+                "description": "Возвращает сегметы пользовател.Принимает id пользователя",
                 "consumes": [
                     "application/json"
                 ],
@@ -471,7 +471,8 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "user_percent": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 0
                 }
             }
         },
@@ -542,13 +543,16 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "days": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 0
                 },
                 "hours": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 0
                 },
                 "minutes": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 0
                 }
             }
         },
