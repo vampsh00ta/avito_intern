@@ -6,8 +6,6 @@ import (
 	"context"
 )
 
-//go:generate mockgen -source=service.go -destination=mocks/mock.go
-
 type User interface {
 	CreateUser(ctx context.Context, username string) error
 	DeleteUser(ctx context.Context, userId int) error

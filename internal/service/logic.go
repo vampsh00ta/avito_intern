@@ -3,6 +3,7 @@ package service
 import (
 	rep "avito/internal/db"
 	"context"
+	"fmt"
 	"strconv"
 	"time"
 )
@@ -26,6 +27,7 @@ func (s service) AddSegmentsToUser(ctx context.Context, userId int, segments ...
 			minutes := time.Duration(segment.Expire.Minutes) * time.Minute
 			timeEnds := time.Now().Add(days + hours + minutes)
 			s.ttl.Set(userId, segment.Slug, timeEnds)
+			fmt.Println()
 		}
 		dbSegments = append(dbSegments, &segment.Segment)
 
@@ -101,6 +103,7 @@ func (s service) DeleteSegment(ctx context.Context, segment Segment_DeleteSegmen
 func (s service) GetHistory(ctx context.Context, userId, year, month int) (*[]rep.HistoryRow, error) {
 	var history *[]rep.HistoryRow
 	var err error
+	fmt.Println(userId)
 	if userId != 0 {
 		history, err = s.rep.GetHistoryById(ctx, userId, year, month)
 	} else {

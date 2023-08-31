@@ -5,7 +5,7 @@
 package mock_service
 
 import (
-	db "avito/internal/db"
+	repository "avito/internal/db"
 	service "avito/internal/service"
 	context "context"
 	reflect "reflect"
@@ -103,10 +103,10 @@ func (mr *MockUserMockRecorder) DeleteUser(ctx, userId interface{}) *gomock.Call
 }
 
 // GetUsersSegments mocks base method.
-func (m *MockUser) GetUsersSegments(ctx context.Context, userId int) (*[]db.Segment, error) {
+func (m *MockUser) GetUsersSegments(ctx context.Context, userId int) (*[]repository.Segment, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUsersSegments", ctx, userId)
-	ret0, _ := ret[0].(*[]db.Segment)
+	ret0, _ := ret[0].(*[]repository.Segment)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -207,10 +207,10 @@ func (m *MockHistory) EXPECT() *MockHistoryMockRecorder {
 }
 
 // GetHistory mocks base method.
-func (m *MockHistory) GetHistory(ctx context.Context, userId, year, month int) (*[]db.HistoryRow, error) {
+func (m *MockHistory) GetHistory(ctx context.Context, userId, year, month int) (*[]repository.HistoryRow, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetHistory", ctx, userId, year, month)
-	ret0, _ := ret[0].(*[]db.HistoryRow)
+	ret0, _ := ret[0].(*[]repository.HistoryRow)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -354,10 +354,10 @@ func (mr *MockServiceMockRecorder) DeleteUser(ctx, userId interface{}) *gomock.C
 }
 
 // GetHistory mocks base method.
-func (m *MockService) GetHistory(ctx context.Context, userId, year, month int) (*[]db.HistoryRow, error) {
+func (m *MockService) GetHistory(ctx context.Context, userId, year, month int) (*[]repository.HistoryRow, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetHistory", ctx, userId, year, month)
-	ret0, _ := ret[0].(*[]db.HistoryRow)
+	ret0, _ := ret[0].(*[]repository.HistoryRow)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -369,10 +369,10 @@ func (mr *MockServiceMockRecorder) GetHistory(ctx, userId, year, month interface
 }
 
 // GetUsersSegments mocks base method.
-func (m *MockService) GetUsersSegments(ctx context.Context, userId int) (*[]db.Segment, error) {
+func (m *MockService) GetUsersSegments(ctx context.Context, userId int) (*[]repository.Segment, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUsersSegments", ctx, userId)
-	ret0, _ := ret[0].(*[]db.Segment)
+	ret0, _ := ret[0].(*[]repository.Segment)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

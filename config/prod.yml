@@ -8,6 +8,6 @@ ttl:
 db:
   username: "avito"
   password: "avito"
-  host: "localhost"
+  host: "db"
   port: "5432"
-  name: "db"
+  name: "avito"

@@ -32,7 +32,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Id пользователя",
+                        "description": "user_id",
                         "name": "user_id",
                         "in": "query"
                     },
@@ -55,25 +55,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.Response"
+                            "type": "csv"
                         }
                     },
                     "400": {
-                        "description": "ok",
+                        "description": "Bad Request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httpresponse.Response"
                         }
                     },
                     "404": {
-                        "description": "ok",
+                        "description": "Not Found",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httpresponse.Response"
                         }
                     },
                     "500": {
-                        "description": "ok",
+                        "description": "Internal Server Error",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httpresponse.Response"
                         }
                     }
                 }
@@ -94,7 +94,7 @@ const docTemplate = `{
                 "summary": "DeleteSegment",
                 "parameters": [
                     {
-                        "description": "Слэт",
+                        "description": "slug",
                         "name": "slug",
                         "in": "body",
                         "required": true,
@@ -107,25 +107,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.Response"
+                            "$ref": "#/definitions/httpresponse.Response"
                         }
                     },
                     "400": {
-                        "description": "ok",
+                        "description": "Bad Request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httpresponse.Response"
                         }
                     },
                     "404": {
-                        "description": "ok",
+                        "description": "Not Found",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httpresponse.Response"
                         }
                     },
                     "500": {
-                        "description": "ok",
+                        "description": "Internal Server Error",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httpresponse.Response"
                         }
                     }
                 }
@@ -143,10 +143,10 @@ const docTemplate = `{
                 "tags": [
                     "Segment"
                 ],
-                "summary": "AddSegment",
+                "summary": "CreateSegment",
                 "parameters": [
                     {
-                        "description": "Слэт",
+                        "description": "slug",
                         "name": "slug",
                         "in": "body",
                         "required": true,
@@ -159,25 +159,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.Response"
+                            "$ref": "#/definitions/httpresponse.Response"
                         }
                     },
                     "400": {
-                        "description": "ok",
+                        "description": "Bad Request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httpresponse.Response"
                         }
                     },
                     "404": {
-                        "description": "ok",
+                        "description": "Not Found",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httpresponse.Response"
                         }
                     },
                     "500": {
-                        "description": "ok",
+                        "description": "Internal Server Error",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httpresponse.Response"
                         }
                     }
                 }
@@ -185,7 +185,7 @@ const docTemplate = `{
         },
         "/user": {
             "delete": {
-                "description": "Создает пользователя",
+                "description": "Удаляет пользователя",
                 "consumes": [
                     "application/json"
                 ],
@@ -198,7 +198,7 @@ const docTemplate = `{
                 "summary": "DeleteUser",
                 "parameters": [
                     {
-                        "description": "Слэт",
+                        "description": "username",
                         "name": "username",
                         "in": "body",
                         "required": true,
@@ -211,25 +211,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.Response"
+                            "$ref": "#/definitions/httpresponse.Response"
                         }
                     },
                     "400": {
-                        "description": "ok",
+                        "description": "Bad Request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httpresponse.Response"
                         }
                     },
                     "404": {
-                        "description": "ok",
+                        "description": "Not Found",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httpresponse.Response"
                         }
                     },
                     "500": {
-                        "description": "ok",
+                        "description": "Internal Server Error",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httpresponse.Response"
                         }
                     }
                 }
@@ -250,7 +250,7 @@ const docTemplate = `{
                 "summary": "CreateUser",
                 "parameters": [
                     {
-                        "description": "Слэт",
+                        "description": "username",
                         "name": "username",
                         "in": "body",
                         "required": true,
@@ -263,25 +263,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.Response"
+                            "$ref": "#/definitions/httpresponse.Response"
                         }
                     },
                     "400": {
-                        "description": "ok",
+                        "description": "Bad Request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httpresponse.Response"
                         }
                     },
                     "404": {
-                        "description": "ok",
+                        "description": "Not Found",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httpresponse.Response"
                         }
                     },
                     "500": {
-                        "description": "ok",
+                        "description": "Internal Server Error",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httpresponse.Response"
                         }
                     }
                 }
@@ -302,7 +302,7 @@ const docTemplate = `{
                 "summary": "DeleteSegmentsFromUser",
                 "parameters": [
                     {
-                        "description": "Слэт",
+                        "description": "id",
                         "name": "segments",
                         "in": "body",
                         "required": true,
@@ -315,25 +315,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.Response"
+                            "$ref": "#/definitions/httpresponse.Response"
                         }
                     },
                     "400": {
-                        "description": "ok",
+                        "description": "Bad Request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httpresponse.Response"
                         }
                     },
                     "404": {
-                        "description": "ok",
+                        "description": "Not Found",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httpresponse.Response"
                         }
                     },
                     "500": {
-                        "description": "ok",
+                        "description": "Internal Server Error",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httpresponse.Response"
                         }
                     }
                 }
@@ -354,7 +354,7 @@ const docTemplate = `{
                 "summary": "AddSegmentsToUser",
                 "parameters": [
                     {
-                        "description": "Слэт",
+                        "description": "id",
                         "name": "segments",
                         "in": "body",
                         "required": true,
@@ -367,25 +367,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.Response"
+                            "$ref": "#/definitions/httpresponse.Response"
                         }
                     },
                     "400": {
-                        "description": "ok",
+                        "description": "Bad Request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httpresponse.Response"
                         }
                     },
                     "404": {
-                        "description": "ok",
+                        "description": "Not Found",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httpresponse.Response"
                         }
                     },
                     "500": {
-                        "description": "ok",
+                        "description": "Internal Server Error",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httpresponse.Response"
                         }
                     }
                 }
@@ -407,7 +407,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Слэт",
+                        "description": "id",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -417,25 +417,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.Response"
+                            "$ref": "#/definitions/httpresponse.Response"
                         }
                     },
                     "400": {
-                        "description": "ok",
+                        "description": "Bad Request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httpresponse.Response"
                         }
                     },
                     "404": {
-                        "description": "ok",
+                        "description": "Not Found",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httpresponse.Response"
                         }
                     },
                     "500": {
-                        "description": "ok",
+                        "description": "Internal Server Error",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httpresponse.Response"
                         }
                     }
                 }
@@ -467,9 +467,6 @@ const docTemplate = `{
                 "slug"
             ],
             "properties": {
-                "id": {
-                    "type": "integer"
-                },
                 "slug": {
                     "type": "string"
                 },
@@ -495,9 +492,6 @@ const docTemplate = `{
                 "slug"
             ],
             "properties": {
-                "id": {
-                    "type": "integer"
-                },
                 "slug": {
                     "type": "string"
                 }
@@ -532,7 +526,7 @@ const docTemplate = `{
                 }
             }
         },
-        "response.Response": {
+        "httpresponse.Response": {
             "type": "object",
             "properties": {
                 "error": {
@@ -544,11 +538,8 @@ const docTemplate = `{
                 }
             }
         },
-        "service.Segment_AddSegmentsToUser": {
+        "service.Expire": {
             "type": "object",
-            "required": [
-                "slug"
-            ],
             "properties": {
                 "days": {
                     "type": "integer"
@@ -556,11 +547,19 @@ const docTemplate = `{
                 "hours": {
                     "type": "integer"
                 },
-                "id": {
-                    "type": "integer"
-                },
                 "minutes": {
                     "type": "integer"
+                }
+            }
+        },
+        "service.Segment_AddSegmentsToUser": {
+            "type": "object",
+            "required": [
+                "slug"
+            ],
+            "properties": {
+                "expire": {
+                    "$ref": "#/definitions/service.Expire"
                 },
                 "slug": {
                     "type": "string"
@@ -573,9 +572,6 @@ const docTemplate = `{
                 "slug"
             ],
             "properties": {
-                "id": {
-                    "type": "integer"
-                },
                 "slug": {
                     "type": "string"
                 }

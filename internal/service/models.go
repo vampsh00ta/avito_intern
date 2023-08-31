@@ -2,6 +2,9 @@ package service
 
 import db "avito/internal/db"
 
+type SegmentModel struct {
+	Slug string `json:"slug" db:"slug" validate:"required" csv:"slug"`
+}
 type Segment_CreateSegment struct {
 	db.Segment
 	UserPercent int `json:"user_percent,omitempty"`
@@ -15,7 +18,7 @@ type Segment_DeleteSegment struct {
 
 type Segment_AddSegmentsToUser struct {
 	db.Segment
-	*Expire `json:"expire,omitempty"`
+	Expire *Expire `json:"expire,omitempty" schema:"expire"`
 }
 
 type Segment_DeleteSegmentsFromUser struct {

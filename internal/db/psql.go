@@ -2,28 +2,19 @@ package repository
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"time"
 )
 
-func (d *Db) PgError(err error) error {
-	pgError, ok := err.(*pgconn.PgError)
-	if !ok {
-		return nil
+func (d *Db) isError(err error) error {
+	_, ok := err.(*pgconn.PgError)
+
+	if ok {
+		return err
 	}
-	switch pgError.Code {
-	case "23505":
-		return errors.New("already exists")
-	case notError:
-		return nil
-	case emptyValue:
-		return errors.New(emptyValue)
-	default:
-		return errors.New("server error")
-	}
+
 	return nil
 }
 
@@ -36,8 +27,8 @@ const (
 func (d *Db) GetUserIds(ctx context.Context) ([]int, error) {
 	q := `select id  from  users`
 	rows, err := d.client.Query(ctx, q)
-	if d.PgError(err) != nil {
-		return nil, d.PgError(err)
+	if d.isError(err) != nil {
+		return nil, err
 	}
 	ids, err := pgx.CollectRows(rows, pgx.RowTo[int])
 	return ids, nil
@@ -51,13 +42,13 @@ func (d *Db) GetUsersSegments(ctx context.Context, userId int) (*[]Segment, erro
 `
 
 	rows, err := d.client.Query(ctx, q, userId)
-
-	if err != nil {
-		return nil, d.PgError(err)
+	fmt.Println(rows)
+	if d.isError(err) != nil {
+		return nil, err
 	}
 	segments, err := pgx.CollectRows(rows, pgx.RowToStructByName[Segment])
 	if err != nil {
-		return nil, d.PgError(err)
+		return nil, d.isError(err)
 	}
 	return &segments, nil
 
@@ -78,14 +69,14 @@ func (d *Db) DeleteSegmentsFromUser(ctx context.Context, userId int, segments ..
 
 	}
 	q = q[0:len(q)-1] + ")) "
-	if err := tx.QueryRow(ctx, q, args...).Scan(); d.PgError(err) != nil {
-		return d.PgError(err)
+	if err := tx.QueryRow(ctx, q, args...).Scan(); d.isError(err) != nil {
+		return err
 	}
-	if err := d.AddToHistoryUserSlugs(ctx, tx, userId, false, segments...); d.PgError(err) != nil {
-		if errtx := tx.Rollback(ctx); errtx != nil {
-			return d.PgError(err)
+	if err := d.AddToHistoryUserSlugs(ctx, tx, userId, false, segments...); d.isError(err) != nil {
+		if errtx := tx.Rollback(ctx); d.isError(errtx) != nil {
+			return err
 		}
-		return d.PgError(err)
+		return err
 	}
 	return nil
 }
@@ -93,7 +84,7 @@ func (d *Db) AddSegmentsToUser(ctx context.Context, userId int, segments ...*Seg
 	tx, err := d.client.Begin(ctx)
 	defer tx.Commit(ctx)
 	if err != nil {
-		return d.PgError(err)
+		return d.isError(err)
 	}
 	q := `insert into user_segment (user_id,segment_id) select $1,segments.id from segments where slug in ( `
 	var args = []any{userId}
@@ -105,22 +96,22 @@ func (d *Db) AddSegmentsToUser(ctx context.Context, userId int, segments ...*Seg
 
 	}
 	q = q[0:len(q)-1] + ")"
-	if err := tx.QueryRow(ctx, q, args...).Scan(); d.PgError(err) != nil {
-		return d.PgError(err)
+	if err := tx.QueryRow(ctx, q, args...).Scan(); d.isError(err) != nil {
+		return err
 	}
-	if err := d.AddToHistoryUserSlugs(ctx, tx, userId, true, segments...); d.PgError(err) != nil {
-		if errtx := tx.Rollback(ctx); errtx != nil {
-			return errors.New("tx error")
+	if err := d.AddToHistoryUserSlugs(ctx, tx, userId, true, segments...); d.isError(err) != nil {
+		if errtx := tx.Rollback(ctx); d.isError(errtx) != nil {
+			return err
 		}
-		return d.PgError(err)
+		return err
 	}
 	return nil
 }
 func (d *Db) AddSlugIdToUsers(ctx context.Context, segment Segment, ids ...int) (err error) {
 	tx, err := d.client.Begin(ctx)
 	defer tx.Commit(ctx)
-	if err != nil {
-		return d.PgError(err)
+	if d.isError(err) != nil {
+		return err
 	}
 
 	q := `insert into user_segment (user_id,segment_id) values `
@@ -132,33 +123,30 @@ func (d *Db) AddSlugIdToUsers(ctx context.Context, segment Segment, ids ...int) 
 	}
 	q = q[0 : len(q)-1]
 
-	if err := tx.QueryRow(ctx, q, args...).Scan(); d.PgError(err) != nil {
-		return d.PgError(err)
+	if err := tx.QueryRow(ctx, q, args...).Scan(); d.isError(err) != nil {
+		return err
 	}
-	if err := d.AddToHistorySlugUsers(ctx, tx, segment, true, ids...); d.PgError(err) != nil {
-		if errtx := tx.Rollback(ctx); errtx != nil {
-			return errors.New("tx error")
+	if err := d.AddToHistorySlugUsers(ctx, tx, segment, true, ids...); d.isError(err) != nil {
+		if errtx := tx.Rollback(ctx); d.isError(errtx) != nil {
+			return err
 		}
-		return d.PgError(err)
+		return err
 	}
 	return nil
 }
 func (d *Db) CreateUser(ctx context.Context, username string) error {
-	q := `insert into users (username) values ($1) `
-	if username == "" {
-		return errors.New("emptyValue")
-	}
-	if err := d.client.QueryRow(ctx, q, username).Scan(); err != nil {
-		fmt.Println(err)
-		return d.PgError(err)
+	q := `insert into users (username) values ($1)`
+
+	if err := d.client.QueryRow(ctx, q, username).Scan(); d.isError(err) != nil {
+		return err
 	}
 	return nil
 }
 
 func (d *Db) DeleteUser(ctx context.Context, id int) error {
 	q := `delete from users where id = $1 `
-	if err := d.client.QueryRow(ctx, q, id).Scan(); err != nil {
-		return d.PgError(err)
+	if err := d.client.QueryRow(ctx, q, id).Scan(); d.isError(err) != nil {
+		return err
 	}
 	return nil
 }
@@ -166,16 +154,16 @@ func (d *Db) DeleteUser(ctx context.Context, id int) error {
 func (d *Db) CreateSegment(ctx context.Context, segment Segment) (int, error) {
 	q := `insert into segments (slug) values ($1) returning id`
 	var id int
-	if err := d.client.QueryRow(ctx, q, segment.Slug).Scan(&id); err != nil {
-		return -1, d.PgError(err)
+	if err := d.client.QueryRow(ctx, q, segment.Slug).Scan(&id); d.isError(err) != nil {
+		return -1, err
 	}
 	return id, nil
 }
 
 func (d *Db) DeleteSegment(ctx context.Context, segment Segment) error {
 	q := `delete from segments where slug = $1 `
-	if err := d.client.QueryRow(ctx, q, segment.Slug).Scan(); err != nil {
-		return d.PgError(err)
+	if err := d.client.QueryRow(ctx, q, segment.Slug).Scan(); d.isError(err) != nil {
+		return err
 	}
 	return nil
 }
@@ -198,10 +186,9 @@ func (d *Db) AddToHistorySlugUsers(ctx context.Context, tx pgx.Tx, segment Segme
 		args = append(args, id)
 	}
 	q = q[0 : len(q)-1]
-	fmt.Println(q, ids)
-	if err := tx.QueryRow(ctx, q, args...).Scan(); d.PgError(err) != nil {
-		fmt.Println(err)
-		return d.PgError(err)
+	if err := tx.QueryRow(ctx, q, args...).Scan(); d.isError(err) != nil {
+
+		return err
 	}
 	return nil
 }
@@ -224,8 +211,8 @@ func (d *Db) AddToHistoryUserSlugs(ctx context.Context, tx pgx.Tx, userId int, o
 	}
 	q = q[0 : len(q)-1]
 
-	if err := tx.QueryRow(ctx, q, args...).Scan(); d.PgError(err) != nil {
-		return d.PgError(err)
+	if err := tx.QueryRow(ctx, q, args...).Scan(); d.isError(err) != nil {
+		return err
 	}
 	return nil
 
@@ -238,8 +225,8 @@ func (d *Db) GetHistoryById(ctx context.Context, userId int, year, month int) (*
 
 	rows, err := d.client.Query(ctx, q, userId, year, month)
 
-	if d.PgError(err) != nil {
-		return nil, d.PgError(err)
+	if d.isError(err) != nil {
+		return nil, d.isError(err)
 	}
 	history, err := pgx.CollectRows(rows, pgx.RowToStructByName[HistoryRow])
 	return &history, nil
@@ -253,8 +240,8 @@ func (d *Db) GetHistoryAll(ctx context.Context, year, month int) (*[]HistoryRow,
 
 	rows, err := d.client.Query(ctx, q, year, month)
 
-	if d.PgError(err) != nil {
-		return nil, d.PgError(err)
+	if d.isError(err) != nil {
+		return nil, err
 	}
 	history, err := pgx.CollectRows(rows, pgx.RowToStructByName[HistoryRow])
 	return &history, nil

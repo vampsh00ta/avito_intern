@@ -48,6 +48,7 @@ func Load() (*Config, error) {
 	if err := d.Decode(&cfg); err != nil {
 		return nil, err
 	}
+
 	return cfg, nil
 
 }

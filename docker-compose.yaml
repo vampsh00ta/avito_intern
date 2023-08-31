@@ -1,4 +1,4 @@
-version: "3"
+version: '3.8'
 services:
   app:
     build:
@@ -8,42 +8,60 @@ services:
     env_file:
       - .env
     ports:
-      - 8000:8000
+      - "8000:8000"
     restart: always
-    links:
+
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
       - db
   db:
     image: postgres:14.6
     restart: always
+    container_name: db
     hostname: db
+
     environment:
       POSTGRES_DB: "avito"
       POSTGRES_USER: "avito"
       POSTGRES_PASSWORD: "avito"
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgres
     healthcheck:
-      test: pg_isready -U avito -d avito
-      interval: 10s
-      timeout: 3s
+      test: [ "CMD-SHELL", "pg_isready -U avito" ]
+      interval: 5s
+      timeout: 5s
       retries: 5
 
+
   migrate:
-    image: migrate/migrate
+    image: migrate/migrate:v4.15.2
 
     volumes:
-      - .:/migrations
-    command: [ "-path", "migrations", "-database",  "postgres://avito:avito@avito:5432/avito?sslmode=disable&connect_timeout=10", "up" ]
-    links:
-      - app
+      - ./migrations:/migrations
+
+    entrypoint:
+      [
+        "migrate",
+        "-path",
+        "/migrations",
+        "-database",
+        "postgres://avito:avito@db:5432/avito?sslmode=disable",
+      ]
+    command: [ "up" ]
     depends_on:
-      - app
+      db:
+        condition: service_healthy
+    restart: on-failure
+    networks:
+      - db
 
 networks:
   db:
-
+    driver: bridge
 volumes:
   postgres_data:
 

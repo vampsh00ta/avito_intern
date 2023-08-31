@@ -4,7 +4,6 @@ import (
 	postgresql "avito/pkg/client"
 	"context"
 	"github.com/jackc/pgx/v5"
-	"go.uber.org/zap"
 )
 
 type Repository interface {
@@ -34,12 +33,10 @@ type History interface {
 }
 type Db struct {
 	client postgresql.Client
-	log    *zap.SugaredLogger
 }
 
-func New(client postgresql.Client, logger *zap.SugaredLogger) Repository {
+func New(client postgresql.Client) Repository {
 	return &Db{
 		client,
-		logger,
 	}
 }

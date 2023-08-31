@@ -60,7 +60,7 @@ func main() {
 	//	DB:       cfg.DB,
 	//})
 	//postgres repository
-	repository := db.New(dbClient, logger)
+	repository := db.New(dbClient)
 	//redis repository
 	//repRedis := r.New(clientRedis, logger)
 	//new TTL
@@ -82,10 +82,11 @@ func main() {
 	router.Methods("POST").Path("/user/new").HandlerFunc(httpServer.CreateUser)
 	router.Methods("DELETE").Path("/user").HandlerFunc(httpServer.DeleteUser)
 	router.Methods("GET").Path("/user/segments/{id}").HandlerFunc(httpServer.GetUsersSegments)
-	router.Methods("POST").Path("/user/segments/new").HandlerFunc(httpServer.AddSegmentsToUser)
+	router.Methods("POST").Path("/user/segments/add").HandlerFunc(httpServer.AddSegmentsToUser)
+
 	router.Methods("DELETE").Path("/user/segments").HandlerFunc(httpServer.DeleteSegmentsFromUser)
 
-	router.Methods("POST").Path("/segment/new").HandlerFunc(httpServer.AddSegment)
+	router.Methods("POST").Path("/segment/new").HandlerFunc(httpServer.CreateSegment)
 	router.Methods("DELETE").Path("/segment").HandlerFunc(httpServer.DeleteSegment)
 
 	router.Methods("GET").Path("/history").HandlerFunc(httpServer.GetHistory)

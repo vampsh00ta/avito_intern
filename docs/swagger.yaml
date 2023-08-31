@@ -13,8 +13,6 @@ definitions:
     type: object
   dto.RequestCreateSegment:
     properties:
-      id:
-        type: integer
       slug:
         type: string
       user_percent:
@@ -31,8 +29,6 @@ definitions:
     type: object
   dto.RequestDeleteSegment:
     properties:
-      id:
-        type: integer
       slug:
         type: string
     required:
@@ -57,7 +53,7 @@ definitions:
     required:
     - id
     type: object
-  response.Response:
+  httpresponse.Response:
     properties:
       error:
         type: string
@@ -65,16 +61,19 @@ definitions:
       status:
         type: string
     type: object
-  service.Segment_AddSegmentsToUser:
+  service.Expire:
     properties:
       days:
         type: integer
       hours:
         type: integer
-      id:
-        type: integer
       minutes:
         type: integer
+    type: object
+  service.Segment_AddSegmentsToUser:
+    properties:
+      expire:
+        $ref: '#/definitions/service.Expire'
       slug:
         type: string
     required:
@@ -82,8 +81,6 @@ definitions:
     type: object
   service.Segment_DeleteSegmentsFromUser:
     properties:
-      id:
-        type: integer
       slug:
         type: string
     required:
@@ -98,7 +95,7 @@ paths:
       - application/json
       description: Возвращает историю добавления/удаления сегментов пользователю
       parameters:
-      - description: Id пользователя
+      - description: user_id
         in: query
         name: user_id
         type: integer
@@ -118,19 +115,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.Response'
+            type: csv
         "400":
-          description: ok
+          description: Bad Request
           schema:
-            type: string
+            $ref: '#/definitions/httpresponse.Response'
         "404":
-          description: ok
+          description: Not Found
           schema:
-            type: string
+            $ref: '#/definitions/httpresponse.Response'
         "500":
-          description: ok
+          description: Internal Server Error
           schema:
-            type: string
+            $ref: '#/definitions/httpresponse.Response'
       summary: GetHistory
       tags:
       - History
@@ -140,7 +137,7 @@ paths:
       - application/json
       description: Удаляет сегмент
       parameters:
-      - description: Слэт
+      - description: slug
         in: body
         name: slug
         required: true
@@ -152,19 +149,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/httpresponse.Response'
         "400":
-          description: ok
+          description: Bad Request
           schema:
-            type: string
+            $ref: '#/definitions/httpresponse.Response'
         "404":
-          description: ok
+          description: Not Found
           schema:
-            type: string
+            $ref: '#/definitions/httpresponse.Response'
         "500":
-          description: ok
+          description: Internal Server Error
           schema:
-            type: string
+            $ref: '#/definitions/httpresponse.Response'
       summary: DeleteSegment
       tags:
       - Segment
@@ -174,7 +171,7 @@ paths:
       - application/json
       description: Создает сегмент
       parameters:
-      - description: Слэт
+      - description: slug
         in: body
         name: slug
         required: true
@@ -186,29 +183,29 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/httpresponse.Response'
         "400":
-          description: ok
+          description: Bad Request
           schema:
-            type: string
+            $ref: '#/definitions/httpresponse.Response'
         "404":
-          description: ok
+          description: Not Found
           schema:
-            type: string
+            $ref: '#/definitions/httpresponse.Response'
         "500":
-          description: ok
+          description: Internal Server Error
           schema:
-            type: string
-      summary: AddSegment
+            $ref: '#/definitions/httpresponse.Response'
+      summary: CreateSegment
       tags:
       - Segment
   /user:
     delete:
       consumes:
       - application/json
-      description: Создает пользователя
+      description: Удаляет пользователя
       parameters:
-      - description: Слэт
+      - description: username
         in: body
         name: username
         required: true
@@ -220,19 +217,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/httpresponse.Response'
         "400":
-          description: ok
+          description: Bad Request
           schema:
-            type: string
+            $ref: '#/definitions/httpresponse.Response'
         "404":
-          description: ok
+          description: Not Found
           schema:
-            type: string
+            $ref: '#/definitions/httpresponse.Response'
         "500":
-          description: ok
+          description: Internal Server Error
           schema:
-            type: string
+            $ref: '#/definitions/httpresponse.Response'
       summary: DeleteUser
       tags:
       - User
@@ -242,7 +239,7 @@ paths:
       - application/json
       description: Создает пользователя
       parameters:
-      - description: Слэт
+      - description: username
         in: body
         name: username
         required: true
@@ -254,19 +251,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/httpresponse.Response'
         "400":
-          description: ok
+          description: Bad Request
           schema:
-            type: string
+            $ref: '#/definitions/httpresponse.Response'
         "404":
-          description: ok
+          description: Not Found
           schema:
-            type: string
+            $ref: '#/definitions/httpresponse.Response'
         "500":
-          description: ok
+          description: Internal Server Error
           schema:
-            type: string
+            $ref: '#/definitions/httpresponse.Response'
       summary: CreateUser
       tags:
       - User
@@ -276,7 +273,7 @@ paths:
       - application/json
       description: Удаляет сегменты пользователя
       parameters:
-      - description: Слэт
+      - description: id
         in: body
         name: segments
         required: true
@@ -288,19 +285,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/httpresponse.Response'
         "400":
-          description: ok
+          description: Bad Request
           schema:
-            type: string
+            $ref: '#/definitions/httpresponse.Response'
         "404":
-          description: ok
+          description: Not Found
           schema:
-            type: string
+            $ref: '#/definitions/httpresponse.Response'
         "500":
-          description: ok
+          description: Internal Server Error
           schema:
-            type: string
+            $ref: '#/definitions/httpresponse.Response'
       summary: DeleteSegmentsFromUser
       tags:
       - User
@@ -310,7 +307,7 @@ paths:
       - application/json
       description: Возвращает сегметы пользователя
       parameters:
-      - description: Слэт
+      - description: id
         in: path
         name: id
         required: true
@@ -321,19 +318,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/httpresponse.Response'
         "400":
-          description: ok
+          description: Bad Request
           schema:
-            type: string
+            $ref: '#/definitions/httpresponse.Response'
         "404":
-          description: ok
+          description: Not Found
           schema:
-            type: string
+            $ref: '#/definitions/httpresponse.Response'
         "500":
-          description: ok
+          description: Internal Server Error
           schema:
-            type: string
+            $ref: '#/definitions/httpresponse.Response'
       summary: GetUsersSegments
       tags:
       - User
@@ -343,7 +340,7 @@ paths:
       - application/json
       description: Добавляет сегменты пользователю
       parameters:
-      - description: Слэт
+      - description: id
         in: body
         name: segments
         required: true
@@ -355,19 +352,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/httpresponse.Response'
         "400":
-          description: ok
+          description: Bad Request
           schema:
-            type: string
+            $ref: '#/definitions/httpresponse.Response'
         "404":
-          description: ok
+          description: Not Found
           schema:
-            type: string
+            $ref: '#/definitions/httpresponse.Response'
         "500":
-          description: ok
+          description: Internal Server Error
           schema:
-            type: string
+            $ref: '#/definitions/httpresponse.Response'
       summary: AddSegmentsToUser
       tags:
       - User

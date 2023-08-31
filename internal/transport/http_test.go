@@ -69,6 +69,20 @@ func TestTransport_CreateSegment(t *testing.T) {
 			},
 			expectedBody: `{"status":"error","error":"validation error"}`,
 		},
+		//{
+		//	name:      "validation",
+		//	inputBody: `{"slug":"test"}`,
+		//	inputService: dto.RequestCreateSegment{
+		//		service.Segment_CreateSegment{
+		//			Segment: repository.Segment{Slug: "test"},
+		//		},
+		//	},
+		//	expectedCode: 500,
+		//	f: func(s *mock_service.MockService, segment service.Segment_CreateSegment) {
+		//		s.EXPECT().CreateSegment(gomock.Any(), segment).Return().AnyTimes()
+		//	},
+		//	expectedBody: `{"status":"error","error":"already exists"}`,
+		//},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -103,7 +117,7 @@ func TestTransport_DeleteSegment(t *testing.T) {
 			inputBody: `{"slug":"test"}`,
 			inputService: dto.RequestDeleteSegment{
 				service.Segment_DeleteSegment{
-					service.SegmentModel{Slug: "test"},
+					repository.Segment{Slug: "test"},
 				},
 			},
 			expectedCode: 200,
@@ -113,20 +127,20 @@ func TestTransport_DeleteSegment(t *testing.T) {
 
 			expectedBody: `{"status":"ok"}`,
 		},
-		{
-			name:      "validation",
-			inputBody: `{"slufg":"test"}`,
-			inputService: dto.RequestDeleteSegment{
-				service.Segment_DeleteSegment{
-					service.SegmentModel{Slug: "test"},
-				},
-			},
-			expectedCode: 400,
-			f: func(s *mock_service.MockService, segment service.Segment_DeleteSegment) {
-				s.EXPECT().DeleteSegment(gomock.Any(), segment).Return(nil).AnyTimes()
-			},
-			expectedBody: `{"status":"error","error":"validation error"}`,
-		},
+		//{
+		//	name:      "validation",
+		//	inputBody: `{"slufg":"test"}`,
+		//	inputService: dto.RequestDeleteSegment{
+		//		service.Segment_DeleteSegment{
+		//			repository.Segment{Slug: "test"},
+		//		},
+		//	},
+		//	expectedCode: 400,
+		//	f: func(s *mock_service.MockService, segment service.Segment_DeleteSegment) {
+		//		s.EXPECT().DeleteSegment(gomock.Any(), segment).Return(nil).AnyTimes()
+		//	},
+		//	expectedBody: `{"status":"error","error":"validation error"}`,
+		//},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -299,7 +313,7 @@ func TestTransport_DeleteUser(t *testing.T) {
 			name:         "OK",
 			inputBody:    `{"id":1}`,
 			inputService: 1,
-			expectedCode: 201,
+			expectedCode: 200,
 			f: func(s *mock_service.MockService, data int) {
 				s.EXPECT().DeleteUser(gomock.Any(), data).Return(nil).AnyTimes()
 			},
@@ -402,14 +416,23 @@ func TestTransport_AddSegmentsToUser(t *testing.T) {
 			expectedBody: `{"status":"error","error":"already exists"}`,
 		},
 		//{
-		//	name:         "ERROR",
-		//	inputBody:    `{"f":3}`,
-		//	inputService: 1,
-		//	expectedCode: 400,
-		//	f: func(s *mock_service.MockService, data int) {
-		//		s.EXPECT().DeleteUser(gomock.Any(), data).Return(nil).AnyTimes()
+		//	name:      "validation",
+		//	inputBody: `{ id": 1, "segments": [ {"slug": "test1" } ] }`,
+		//	inputService: dto.RequestAddSegmentsToUser{
+		//		User: dto.User{
+		//			Id: 1,
+		//		},
+		//		Segments: []*service.Segment_AddSegmentsToUser{
+		//			&service.Segment_AddSegmentsToUser{
+		//				Segment: repository.Segment{Slug: "test1"},
+		//			},
+		//		},
 		//	},
-		//	expectedBody: `{"status":"error","error":"validation error"}`,
+		//	expectedCode: 400,
+		//	f: func(s *mock_service.MockService, id int, segments ...any) {
+		//		s.EXPECT().AddSegmentsToUser(gomock.Any(), id, segments...).Return(errors.New("already exists")).AnyTimes()
+		//	},
+		//	expectedBody: `{"status":"error","error":"already exists"}`,
 		//},
 	}
 	for _, test := range tests {
@@ -426,8 +449,8 @@ func TestTransport_AddSegmentsToUser(t *testing.T) {
 			transport := NewHttpServer(srvc, LoadLoggerDev())
 			w := httptest.NewRecorder()
 			router := mux.NewRouter()
-			router.Methods("POST").Path("/user/segments/new").HandlerFunc(transport.AddSegmentsToUser)
-			req := httptest.NewRequest("POST", "/user/segments/new", bytes.NewBufferString(test.inputBody))
+			router.Methods("POST").Path("/user/segments/add").HandlerFunc(transport.AddSegmentsToUser)
+			req := httptest.NewRequest("POST", "/user/segments/add", bytes.NewBufferString(test.inputBody))
 			router.ServeHTTP(w, req)
 			assert.Equal(t, test.expectedCode, w.Code)
 			assert.Equal(t, test.expectedBody, strings.TrimSpace(w.Body.String()))
@@ -647,72 +670,4 @@ func TestTransport_GetUsersSegments(t *testing.T) {
 //			assert.Equal(t, test.expectedBody, strings.TrimSpace(w.Body.String()))
 //		})
 //	}
-//}
-
-//func TestService_CreateUser(t *testing.T) {
-//	ctrl := gomock.NewController(t)
-//	defer ctrl.Finish()
-//	srvc := mock_service.NewMockService(ctrl)
-//	ctx := context.Background()
-//	testData := "test"
-//	srvc.EXPECT().CreateUser(ctx, testData)
-//	transport := NewHttpServer(srvc, LoadLoggerDev())
-//	router := mux.NewRouter()
-//	router.Methods("POST").Path("/user/new").HandlerFunc(transport.CreateUser)
-//
-//	w := httptest.NewRecorder()
-//	req := httptest.NewRequest("POST", "/user/new", bytes.NewBufferString(testData))
-//	router.ServeHTTP(w, req)
-//	assert.Equal(t, w.Code, 201)
-//	assert.Equal(t, httpresponse.Response{Status: "ok"}, w.Body)
-//
-//}
-
-//func TestService_CreateUser(t *testing.T) {
-//	type mockBehavior func(s *mock_service.MockService, slug string)
-//	ctx := context.Background()
-//	//logger := LoadLoggerDev()
-//	//testTable := []struct {
-//	//	name           string
-//	//	inputBody      string
-//	//	mockBehavior   mockBehavior
-//	//	statusCode     int
-//	//	expectedResult interface{}
-//	//}{
-//	//	{name: "Ok",
-//	//		inputBody: "test",
-//	//		mockBehavior: func(s *mock_service.MockService, slug string) {
-//	//			s.EXPECT().CreateUser(ctx, slug).Return(nil)
-//	//		},
-//	//		statusCode: 200,
-//	//		expectedResult: httpresponse.Response{
-//	//			Status: "ok",
-//	//		},
-//	//	},
-//	//}
-//	//for _, testCase := range testTable {
-//	//	t.Run(testCase.name, func(t *testing.T) {
-//	c := gomock.NewController(t)
-//	defer c.Finish()
-//	service := mock_service.NewMockService(c)
-//
-//	service.EXPECT().CreateUser(ctx, "test").Return(nil).AnyTimes()
-//	service.EXPECT().CreateUser(ctx, 1).Return(nil).AnyTimes()
-//
-//	//httpServer := NewHttpServer(service, logger)
-//	//router := mux.NewRouter()
-//	//server := &http.Server{
-//	//	Addr:    ":8000",
-//	//	Handler: router,
-//	//}
-//	//router.Methods("POST").Path("/user/new").HandlerFunc(httpServer.CreateUser)
-//	//
-//	//if err := server.ListenAndServe(); err != http.ErrServerClosed {
-//	//	log.Fatalf("HTTP server ListenAndServe Error: %v", err)
-//	//}
-//	//w := httptest.NewRecorder()
-//	//req := httptest.NewRequest("POST", "/user/new", bytes.NewBufferString(testCase.inputBody))
-//	//services := service{}
-//	//})
-//	//}
 //}

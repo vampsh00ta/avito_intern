@@ -3,7 +3,7 @@ package repository
 import "time"
 
 type Segment struct {
-	Id   int    `json:"id,omitempty" db:"-"   csv:"-"`
+	Id   int    `json:"-" db:"-"   csv:"-"`
 	Slug string `json:"slug" db:"slug" validate:"required" csv:"slug"`
 }
 
