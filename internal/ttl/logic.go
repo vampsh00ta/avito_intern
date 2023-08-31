@@ -46,16 +46,16 @@ func (t *TTLCache) Start(exit chan struct{}) {
 					splitedKey := strings.Split(keyUserIdSlug, ":")
 					userId, err := strconv.Atoi(splitedKey[0])
 					if err != nil {
-						t.logger.Errorw("userId convert error", "error", err)
+						t.logger.Infow("userId convert error", "error", err)
 						continue
 					}
 					slug := splitedKey[1]
 					if err := t.rep.DeleteSegmentsFromUser(context.Background(), userId, &rep.Segment{Slug: slug}); err != nil {
-						t.logger.Errorw("db err", "error", err)
+						t.logger.Infow("db err", "error", err)
 						continue
 					}
 					t.Delete(keyUserIdSlug)
-					t.logger.Infow("deleted expired data", "user", userId, "slug", slug)
+					t.logger.Infow("        TTL ", "userId", userId, "slug", slug)
 				}
 
 			}

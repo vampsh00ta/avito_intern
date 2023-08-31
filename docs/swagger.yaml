@@ -334,7 +334,7 @@ paths:
       summary: GetUsersSegments
       tags:
       - User
-  /user/segments/new:
+  /user/segments/add:
     post:
       consumes:
       - application/json

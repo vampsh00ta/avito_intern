@@ -256,7 +256,7 @@ func (h HttpServer) GetUsersSegments(w http.ResponseWriter, r *http.Request) {
 //	@Failure		400	{object}	httpresponse.Response
 //	@Failure		404	{object}	httpresponse.Response
 //	@Failure		500	{object}	httpresponse.Response
-//	@Router			/user/segments/new [post]
+//	@Router			/user/segments/add [post]
 func (h HttpServer) AddSegmentsToUser(w http.ResponseWriter, r *http.Request) {
 	var req dto.RequestAddSegmentsToUser
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {

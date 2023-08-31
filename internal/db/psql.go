@@ -42,7 +42,6 @@ func (d *Db) GetUsersSegments(ctx context.Context, userId int) (*[]Segment, erro
 `
 
 	rows, err := d.client.Query(ctx, q, userId)
-	fmt.Println(rows)
 	if d.isError(err) != nil {
 		return nil, err
 	}

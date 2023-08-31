@@ -339,7 +339,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/user/segments/new": {
+        "/user/segments/add": {
             "post": {
                 "description": "Добавляет сегменты пользователю",
                 "consumes": [

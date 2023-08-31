@@ -7,11 +7,14 @@ import (
 	"avito/internal/service"
 	"avito/internal/transport"
 	"avito/internal/ttl"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+
 	postgresql "avito/pkg/client"
 	"context"
 	"fmt"
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/gorilla/mux"
-
 	httpSwagger "github.com/swaggo/http-swagger/v2"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -53,21 +56,16 @@ func main() {
 	if err != nil {
 		logger.Fatal(err.Error())
 	}
-	//redis client
-	//clientRedis := redis.NewClient(&redis.Options{
-	//	Addr:     cfg.Addr,
-	//	Password: cfg.Redis.Password,
-	//	DB:       cfg.DB,
-	//})
+	//migrations
+	migrateUp(cfg)
+
 	//postgres repository
 	repository := db.New(dbClient)
-	//redis repository
-	//repRedis := r.New(clientRedis, logger)
-	//new TTL
-	//service
-	//ttl := ttl.New(repository, logger, repRedis, cfg)
+
+	//ttl service
 	ttl := ttl.New(repository, logger, cfg)
 
+	//services
 	srvc := service.New(repository, ttl)
 
 	//transport
@@ -83,7 +81,6 @@ func main() {
 	router.Methods("DELETE").Path("/user").HandlerFunc(httpServer.DeleteUser)
 	router.Methods("GET").Path("/user/segments/{id}").HandlerFunc(httpServer.GetUsersSegments)
 	router.Methods("POST").Path("/user/segments/add").HandlerFunc(httpServer.AddSegmentsToUser)
-
 	router.Methods("DELETE").Path("/user/segments").HandlerFunc(httpServer.DeleteSegmentsFromUser)
 
 	router.Methods("POST").Path("/segment/new").HandlerFunc(httpServer.CreateSegment)
@@ -126,4 +123,16 @@ func LoadLoggerDev() *zap.SugaredLogger {
 	}
 	sugar := logger.Sugar()
 	return sugar
+}
+
+func migrateUp(cfg *config.Config) {
+	url := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		cfg.Username, cfg.Password, cfg.Host, cfg.Port, cfg.Name)
+	m, err := migrate.New("file://migrations", url)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err := m.Up(); err != nil && err.Error() != "no change" {
+		log.Fatal(err)
+	}
 }

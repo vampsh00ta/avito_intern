@@ -35,29 +35,3 @@ func New(rep rep.Repository, logger *zap.SugaredLogger, cfg *config.Config) TTL 
 		cache:  &Cache{storage: storage},
 	}
 }
-
-//
-//type Item struct {
-//	key   string
-//	value time.Time
-//}
-//type TTLMonitor struct {
-//	rep    rep.Repository
-//	logger *zap.SugaredLogger
-//	redis  redis.Repository
-//	cfg    *config.Config
-//}
-//type TTL interface {
-//	Collect(args *[]string, userId int, slug string, time time.Time)
-//	SetTTL(ctx context.Context, slugs ...string) error
-//	DelUsersSegments(ctx context.Context, slugs ...string) error
-//}
-
-//func NewTTL(rep rep.Repository, logger *zap.SugaredLogger, redis redis.Repository, cfg *config.Config) *TTLMonitor {
-//	return &TTLMonitor{
-//		rep:    rep,
-//		logger: logger,
-//		redis:  redis,
-//		cfg:    cfg,
-//	}
-//}
