@@ -2,8 +2,8 @@ package service
 
 import (
 	rep "avito/internal/db"
+	"avito/internal/ttl"
 	"context"
-	"fmt"
 	"strconv"
 	"time"
 )
@@ -20,14 +20,18 @@ func (s service) DeleteUser(ctx context.Context, userId int) error {
 
 func (s service) AddSegmentsToUser(ctx context.Context, userId int, segments ...*Segment_AddSegmentsToUser) error {
 	var dbSegments []*rep.Segment
+	var toSet []ttl.SetModel
 	for _, segment := range segments {
 		if segment.Expire != nil {
 			days := time.Duration(segment.Expire.Days) * time.Hour * 24
 			hours := time.Duration(segment.Expire.Hours) * time.Hour
 			minutes := time.Duration(segment.Expire.Minutes) * time.Minute
 			timeEnds := time.Now().Add(days + hours + minutes)
-			s.ttl.Set(userId, segment.Slug, timeEnds)
-			fmt.Println()
+			toSet = append(toSet, ttl.SetModel{
+				userId,
+				segment.Slug,
+				timeEnds,
+			})
 		}
 		dbSegments = append(dbSegments, &segment.Segment)
 
@@ -35,6 +39,7 @@ func (s service) AddSegmentsToUser(ctx context.Context, userId int, segments ...
 	if err := s.rep.AddSegmentsToUser(ctx, userId, dbSegments...); err != nil {
 		return err
 	}
+	s.ttl.Set(toSet...)
 
 	return nil
 }
@@ -103,7 +108,6 @@ func (s service) DeleteSegment(ctx context.Context, segment Segment_DeleteSegmen
 func (s service) GetHistory(ctx context.Context, userId, year, month int) (*[]rep.HistoryRow, error) {
 	var history *[]rep.HistoryRow
 	var err error
-	fmt.Println(userId)
 	if userId != 0 {
 		history, err = s.rep.GetHistoryById(ctx, userId, year, month)
 	} else {

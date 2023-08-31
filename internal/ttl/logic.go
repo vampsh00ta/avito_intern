@@ -8,10 +8,19 @@ import (
 	"time"
 )
 
-func (t *TTLCache) Set(userId int, slug string, expireTime time.Time) {
-	key := strconv.Itoa(userId) + ":" + slug
+type SetModel struct {
+	UserId     int
+	Slug       string
+	UxpireTime time.Time
+}
+
+func (t *TTLCache) Set(data ...SetModel) {
 	t.cache.Lock()
-	t.cache.storage[key] = expireTime
+	for _, row := range data {
+		key := strconv.Itoa(row.UserId) + ":" + row.Slug
+		t.cache.storage[key] = row.UxpireTime
+	}
+
 	t.cache.Unlock()
 }
 func (t *TTLCache) Delete(keys ...string) {
