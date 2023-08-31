@@ -69,20 +69,20 @@ func TestTransport_CreateSegment(t *testing.T) {
 			},
 			expectedBody: `{"status":"error","error":"validation error"}`,
 		},
-		//{
-		//	name:      "validation",
-		//	inputBody: `{"slug":"test"}`,
-		//	inputService: dto.RequestCreateSegment{
-		//		service.Segment_CreateSegment{
-		//			Segment: repository.Segment{Slug: "test"},
-		//		},
-		//	},
-		//	expectedCode: 500,
-		//	f: func(s *mock_service.MockService, segment service.Segment_CreateSegment) {
-		//		s.EXPECT().CreateSegment(gomock.Any(), segment).Return().AnyTimes()
-		//	},
-		//	expectedBody: `{"status":"error","error":"already exists"}`,
-		//},
+		{
+			name:      "already exists/server",
+			inputBody: `{"slug":"test"}`,
+			inputService: dto.RequestCreateSegment{
+				service.Segment_CreateSegment{
+					Segment: repository.Segment{Slug: "test"},
+				},
+			},
+			expectedCode: 500,
+			f: func(s *mock_service.MockService, segment service.Segment_CreateSegment) {
+				s.EXPECT().CreateSegment(gomock.Any(), segment).Return(errors.New("already exists")).AnyTimes()
+			},
+			expectedBody: `{"status":"error","error":"already exists"}`,
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -127,20 +127,33 @@ func TestTransport_DeleteSegment(t *testing.T) {
 
 			expectedBody: `{"status":"ok"}`,
 		},
-		//{
-		//	name:      "validation",
-		//	inputBody: `{"slufg":"test"}`,
-		//	inputService: dto.RequestDeleteSegment{
-		//		service.Segment_DeleteSegment{
-		//			repository.Segment{Slug: "test"},
-		//		},
-		//	},
-		//	expectedCode: 400,
-		//	f: func(s *mock_service.MockService, segment service.Segment_DeleteSegment) {
-		//		s.EXPECT().DeleteSegment(gomock.Any(), segment).Return(nil).AnyTimes()
-		//	},
-		//	expectedBody: `{"status":"error","error":"validation error"}`,
-		//},
+		{
+			name:      "validation",
+			inputBody: `{"slufg":"test"}`,
+			inputService: dto.RequestDeleteSegment{
+				service.Segment_DeleteSegment{
+					repository.Segment{Slug: "test"},
+				},
+			},
+			expectedCode: 400,
+			f: func(s *mock_service.MockService, segment service.Segment_DeleteSegment) {
+				s.EXPECT().DeleteSegment(gomock.Any(), segment).Return(nil).AnyTimes()
+			},
+			expectedBody: `{"status":"error","error":"validation error"}`,
+		}, {
+			name:      "already exists/server",
+			inputBody: `{"slug":"test"}`,
+			inputService: dto.RequestDeleteSegment{
+				service.Segment_DeleteSegment{
+					repository.Segment{Slug: "test"},
+				},
+			},
+			expectedCode: 500,
+			f: func(s *mock_service.MockService, segment service.Segment_DeleteSegment) {
+				s.EXPECT().DeleteSegment(gomock.Any(), segment).Return(errors.New("smth")).AnyTimes()
+			},
+			expectedBody: `{"status":"error","error":"server error"}`,
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -220,6 +233,20 @@ func TestTransport_CreateSegmentPercent(t *testing.T) {
 				}, nil).AnyTimes()
 			},
 			expectedBody: `{"status":"error","error":"validation error"}`,
+		}, {
+			name:      "already exists/server",
+			inputBody: `{"slug":"test","user_percent":50}`,
+			inputService: dto.RequestCreateSegment{
+				service.Segment_CreateSegment{
+					Segment:     repository.Segment{Slug: "test"},
+					UserPercent: 50,
+				},
+			},
+			expectedCode: 500,
+			f: func(s *mock_service.MockService, segment service.Segment_CreateSegment) {
+				s.EXPECT().CreateSegmentPercent(gomock.Any(), segment).Return(nil, errors.New("already exists"))
+			},
+			expectedBody: `{"status":"error","error":"already exists"}`,
 		},
 	}
 	for _, test := range tests {
@@ -262,7 +289,7 @@ func TestTransport_CreateUser(t *testing.T) {
 			expectedBody: `{"status":"ok"}`,
 		},
 		{
-			name:         "ERROR",
+			name:         "already exists/server",
 			inputBody:    `{"username":"test"}`,
 			inputService: "test",
 			expectedCode: 500,
@@ -320,7 +347,7 @@ func TestTransport_DeleteUser(t *testing.T) {
 			expectedBody: `{"status":"ok"}`,
 		},
 		{
-			name:         "ERROR",
+			name:         "validation",
 			inputBody:    `{"f":3}`,
 			inputService: 1,
 			expectedCode: 400,
@@ -328,6 +355,16 @@ func TestTransport_DeleteUser(t *testing.T) {
 				s.EXPECT().DeleteUser(gomock.Any(), data).Return(nil).AnyTimes()
 			},
 			expectedBody: `{"status":"error","error":"validation error"}`,
+		},
+		{
+			name:         "already exists/server",
+			inputBody:    `{"id":3}`,
+			inputService: 3,
+			expectedCode: 500,
+			f: func(s *mock_service.MockService, data int) {
+				s.EXPECT().DeleteUser(gomock.Any(), data).Return(errors.New("smth")).AnyTimes()
+			},
+			expectedBody: `{"status":"error","error":"server error"}`,
 		},
 	}
 	for _, test := range tests {
@@ -397,7 +434,7 @@ func TestTransport_AddSegmentsToUser(t *testing.T) {
 			expectedBody: `{"status":"error","error":"validation error"}`,
 		},
 		{
-			name:      "already in",
+			name:      "already exists/server",
 			inputBody: `{ "id": 1, "segments": [ {"slug": "test1" } ] }`,
 			inputService: dto.RequestAddSegmentsToUser{
 				User: dto.User{
@@ -504,6 +541,25 @@ func TestTransport_DeleteFromUser(t *testing.T) {
 			},
 			expectedBody: `{"status":"error","error":"validation error"}`,
 		},
+		{
+			name:      "already exists/error",
+			inputBody: `{ "id": 1, "segments": [ {"slug": "test1" } ] }`,
+			inputService: dto.RequestDeleteSegmentsFromUser{
+				User: dto.User{
+					Id: 1,
+				},
+				Segments: []*service.Segment_DeleteSegmentsFromUser{
+					&service.Segment_DeleteSegmentsFromUser{
+						Segment: repository.Segment{Slug: "test1"},
+					},
+				},
+			},
+			expectedCode: 500,
+			f: func(s *mock_service.MockService, id int, segments ...any) {
+				s.EXPECT().DeleteSegmentsFromUser(gomock.Any(), id, segments...).Return(errors.New("smth")).AnyTimes()
+			},
+			expectedBody: `{"status":"error","error":"server error"}`,
+		},
 
 		//{
 		//	name:         "ERROR",
@@ -572,6 +628,16 @@ func TestTransport_GetUsersSegments(t *testing.T) {
 				}, nil).AnyTimes()
 			},
 			expectedBody: `{"status":"error","error":"validation error"}`,
+		},
+		{
+			name:         "already exists/server",
+			inputBody:    "1",
+			inputService: 1,
+			expectedCode: 500,
+			f: func(s *mock_service.MockService, id int) {
+				s.EXPECT().GetUsersSegments(gomock.Any(), id).Return(nil, errors.New("smth")).AnyTimes()
+			},
+			expectedBody: `{"status":"error","error":"server error"}`,
 		},
 	}
 

@@ -13,7 +13,11 @@ const (
 )
 
 func Error(w http.ResponseWriter, err error) error {
+	if err.Error() == "validation error" {
+		return err
+	}
 	if pgError, ok := err.(*pgconn.PgError); ok {
+
 		if pgError.Code == "23505" {
 			return errors.New("already exists")
 		}
@@ -27,7 +31,7 @@ func Error(w http.ResponseWriter, err error) error {
 	if err.Error() == "already exists" {
 		return err
 	}
-	return err
+	return errors.New("server error")
 
 }
 func ReturnError(w http.ResponseWriter, r *http.Request, err error, code int) {

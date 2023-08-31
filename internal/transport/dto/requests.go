@@ -31,7 +31,7 @@ type RequestDeleteSegmentsFromUser struct {
 }
 
 type RequestGetHistory struct {
-	UserID int `json:"user_id"  schema:"user_id"`
+	UserID int `json:"user_id"  schema:"user_id" `
 	Month  int `json:"month" validate:"required"`
 	Year   int `json:"year" validate:"required" `
 }

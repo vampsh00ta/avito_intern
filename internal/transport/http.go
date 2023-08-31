@@ -20,7 +20,7 @@ var decoder = schema.NewDecoder()
 // PingExample godoc
 //
 //	@Summary		CreateUser
-//	@Description	Создает пользователя
+//	@Description	Создает пользователя.Если такой пользователь уже существует,то выведете соответствующую ошибку.
 //	@Tags			User
 //	@Accept			json
 //	@Param  		username   body      dto.RequestCreateUser  true  "username"
@@ -108,7 +108,7 @@ func (h HttpServer) DeleteUser(w http.ResponseWriter, r *http.Request) {
 // PingExample godoc
 //
 //	@Summary		CreateSegment
-//	@Description	Создает сегмент
+//	@Description	Создает сегмент.Если указан user_percent,то добавит созданный сегмент указанному проценту пользователей(округление идет в большую сторону) и добавит запись в history.Если такой сегмент уже существует,то выведет соответствующую ошибку.
 //	@Tags			Segment
 //	@Accept			json
 //
@@ -247,7 +247,7 @@ func (h HttpServer) GetUsersSegments(w http.ResponseWriter, r *http.Request) {
 // PingExample godoc
 //
 //	@Summary		AddSegmentsToUser
-//	@Description	Добавляет сегменты пользователю
+//	@Description	Добавляет сегменты пользователю.Если в сегментах указаны expire,то добавляет заданным сегментам TTL.Также добавляет запись добавления в history
 //	@Tags			User
 //	@Accept			json
 //	@Param  		id    segments  body  dto.RequestAddSegmentsToUser    true  "id"
@@ -287,7 +287,7 @@ func (h HttpServer) AddSegmentsToUser(w http.ResponseWriter, r *http.Request) {
 // PingExample godoc
 //
 //	@Summary		DeleteSegmentsFromUser
-//	@Description	Удаляет сегменты пользователя
+//	@Description	Удаляет сегменты пользователя.Если у сегмента был TTL, то удаляет его из кэша.Также добавляет запись удаления в history
 //	@Tags			User
 //	@Accept			json
 //	@Param  		id    segments  body  dto.RequestDeleteSegmentsFromUser    true  "id"
@@ -328,14 +328,16 @@ func (h HttpServer) DeleteSegmentsFromUser(w http.ResponseWriter, r *http.Reques
 // PingExample godoc
 //
 //	@Summary		GetHistory
-//	@Description	Возвращает историю добавления/удаления сегментов пользователю
+//	@Description	Возвращает историю добавления/удаления сегментов  в виде csv файла.Если указан user_id , то возвращает историю конкретного пользователя, иначе - все историю заданного периода
 //	@Tags			History
 //	@Accept			json
 //	@Param  		user_id query int  false "user_id"
 //	@Param  		month  query  string  true "Месяц"
 //	@Param  		year  query  string true "Год"
 //	@Produce		json
-//	@Success		200 csv  httpresponse.Response
+//
+//
+//	@Success		200 {object}	httpresponse.Response
 //	@Failure		400	{object}	httpresponse.Response
 //	@Failure		404	{object}	httpresponse.Response
 //	@Failure		500	{object}	httpresponse.Response

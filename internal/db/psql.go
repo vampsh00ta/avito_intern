@@ -35,10 +35,10 @@ func (d *Db) GetUserIds(ctx context.Context) ([]int, error) {
 
 }
 func (d *Db) GetUsersSegments(ctx context.Context, userId int) (*[]Segment, error) {
-	q := `select slug  from  segments  as s
+	q := `select   slug  from  segments  as s
     inner join  user_segment as us on s.id=us.segment_id
 	inner join  users as u on u.id=us.user_id
-	where u.id = $1
+	where u.id = $1 
 `
 
 	rows, err := d.client.Query(ctx, q, userId)

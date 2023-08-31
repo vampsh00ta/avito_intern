@@ -93,7 +93,9 @@ paths:
     get:
       consumes:
       - application/json
-      description: Возвращает историю добавления/удаления сегментов пользователю
+      description: Возвращает историю добавления/удаления сегментов  в виде csv файла.Если
+        указан user_id , то возвращает историю конкретного пользователя, иначе - все
+        историю заданного периода
       parameters:
       - description: user_id
         in: query
@@ -115,7 +117,7 @@ paths:
         "200":
           description: OK
           schema:
-            type: csv
+            $ref: '#/definitions/httpresponse.Response'
         "400":
           description: Bad Request
           schema:
@@ -169,7 +171,10 @@ paths:
     post:
       consumes:
       - application/json
-      description: Создает сегмент
+      description: Создает сегмент.Если указан user_percent,то добавит созданный сегмент
+        указанному проценту пользователей(округление идет в большую сторону) и добавит
+        запись в history.Если такой сегмент уже существует,то выведет соответствующую
+        ошибку.
       parameters:
       - description: slug
         in: body
@@ -237,7 +242,8 @@ paths:
     post:
       consumes:
       - application/json
-      description: Создает пользователя
+      description: Создает пользователя.Если такой пользователь уже существует,то
+        выведете соответствующую ошибку.
       parameters:
       - description: username
         in: body
@@ -271,7 +277,8 @@ paths:
     delete:
       consumes:
       - application/json
-      description: Удаляет сегменты пользователя
+      description: Удаляет сегменты пользователя.Если у сегмента был TTL, то удаляет
+        его из кэша.Также добавляет запись удаления в history
       parameters:
       - description: id
         in: body
@@ -338,7 +345,8 @@ paths:
     post:
       consumes:
       - application/json
-      description: Добавляет сегменты пользователю
+      description: Добавляет сегменты пользователю.Если в сегментах указаны expire,то
+        добавляет заданным сегментам TTL.Также добавляет запись добавления в history
       parameters:
       - description: id
         in: body
