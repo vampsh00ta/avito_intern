@@ -1,4 +1,4 @@
-create table history (
+create table if not exists  history (
 
       id serial primary key ,
       user_id int,

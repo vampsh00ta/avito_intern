@@ -1,4 +1,4 @@
 BEGIN;
-drop table users;
-drop table segments;
+drop table if exists users;
+drop table if exists segments;
 commit;

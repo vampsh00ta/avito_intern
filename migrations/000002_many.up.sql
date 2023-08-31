@@ -1,4 +1,4 @@
-create table user_segment (
+create table IF not EXISTS user_segment (
       user_id int,
       segment_id int,
       CONSTRAINT pk_user_segment PRIMARY KEY (user_id, segment_id) ,

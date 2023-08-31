@@ -1,2 +1,2 @@
 ALTER TABLE users
-DROP COLUMN last_update;
+DROP    COLUMN if exists last_update;

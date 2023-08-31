@@ -1,10 +1,10 @@
 BEGIN;
-create table users (
+create table IF  not EXISTS users (
     id serial primary key,
     username varchar(255),
     last_update  timestamp
 );
-create table segments (
+create table  IF  not EXISTS segments (
                        id serial primary key,
                        slug varchar(50)
 );

@@ -1,1 +1,1 @@
-alter table segments add unique (slug)
+alter table  segments add  unique (slug)

@@ -1,1 +1,1 @@
-alter table segments drop unique (slug)
+alter table segments drop   unique (slug)

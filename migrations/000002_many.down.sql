@@ -1,1 +1,1 @@
-drop table user_segment;
+drop table IF  EXISTS user_segment;

@@ -1,2 +1,2 @@
-ALTER TABLE usersmi
-add COLUMN last_update timestamp;
+ALTER TABLE users
+add COLUMN   if not exists last_update timestamp;

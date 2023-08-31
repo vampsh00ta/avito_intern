@@ -1,1 +1,1 @@
-alter table users drop unique (username)
+alter table users drop   unique (username)
