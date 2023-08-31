@@ -12,18 +12,18 @@ type RequestCreateUser struct {
 	Username string `json:"username" validate:"required,gt=0,omitempty"`
 }
 type RequestDeleteUser struct {
-	User `validate:"required,gt=0,omitempty"`
+	User `validate:"required,omitempty"`
 }
 type RequestCreateSegment struct {
 	service.Segment_CreateSegment `validate:"required,gt=0,omitempty" `
 }
 type RequestDeleteSegment struct {
-	service.Segment_DeleteSegment
+	service.Segment_DeleteSegment `validate:"required,gt=0,omitempty" `
 }
 
 type RequestAddSegmentsToUser struct {
 	User
-	Segments []*service.Segment_AddSegmentsToUser `json:"segments" validate:"required,gt=0,omitempty"`
+	Segments []*service.Segment_AddSegmentsToUser `json:"segments" validate:"required,omitempty"`
 }
 type RequestDeleteSegmentsFromUser struct {
 	User

@@ -134,10 +134,15 @@ func (h HttpServer) CreateSegment(w http.ResponseWriter, r *http.Request) {
 	var err error
 	if req.UserPercent == 0 {
 		err = h.service.CreateSegment(r.Context(), req.Segment_CreateSegment)
-	} else {
+	} else if req.UserPercent > 0 {
 		res, err = h.service.CreateSegmentPercent(r.Context(), req.Segment_CreateSegment)
-
+	} else {
+		h.log.Infow("CreateSegment", "method",
+			r.Method, "status", http.StatusInternalServerError, "error", err)
+		httpresponse.ReturnError(w, r, err, http.StatusInternalServerError)
+		return
 	}
+
 	if err != nil {
 		h.log.Infow("CreateSegment", "method",
 			r.Method, "status", http.StatusInternalServerError, "error", err)

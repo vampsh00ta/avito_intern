@@ -68,9 +68,7 @@ func (s service) CreateSegmentPercent(ctx context.Context, segment Segment_Creat
 		return nil, err
 	}
 	segment.Id = slugId
-	if segment.UserPercent == 0 {
-		return nil, err
-	}
+
 	userIds, err := s.rep.GetUserIds(ctx)
 	if err != nil {
 		return nil, err
